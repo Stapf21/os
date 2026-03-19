@@ -201,6 +201,50 @@
                         <div class="accordion-group widget-box">
                             <div class="accordion-heading">
                                 <div class="widget-title">
+                                    <a data-parent="#collapse-group" href="#collapseGPmoc" data-toggle="collapse">
+                                      <span><i class='bx bx-clipboard icon-cli'></i></span>
+                                      <h5 style="padding-left: 28px">PMOC e Plano Mensal</h5>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="collapse accordion-body" id="collapseGPmoc">
+                                <div class="widget-content">
+                                    <table class="table table-bordered">
+                                        <tbody>
+                                        <tr>
+                                            <td>
+                                                <label>
+                                                    <input name="vPmoc" class="marcar" type="checkbox" value="1" />
+                                                    <span class="lbl"> Visualizar PMOC</span>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <label>
+                                                    <input name="aPmoc" class="marcar" type="checkbox" value="1" />
+                                                    <span class="lbl"> Adicionar PMOC</span>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <label>
+                                                    <input name="ePmoc" class="marcar" type="checkbox" value="1" />
+                                                    <span class="lbl"> Editar PMOC</span>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <label>
+                                                    <input name="dPmoc" class="marcar" type="checkbox" value="1" />
+                                                    <span class="lbl"> Excluir PMOC</span>
+                                                </label>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-group widget-box">
+                            <div class="accordion-heading">
+                                <div class="widget-title">
                                     <a data-parent="#collapse-group" href="#collapseGThree3Orc" data-toggle="collapse">
                                       <span><i class='bx bx-file icon-cli'></i></span>
                                       <h5 style="padding-left: 28px">Orcamentos</h5>

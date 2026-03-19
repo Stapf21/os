@@ -76,6 +76,11 @@ class Permissoes extends MY_Controller
                 'dOs' => $this->input->post('dOs'),
                 'vOs' => $this->input->post('vOs'),
 
+                'aPmoc' => $this->input->post('aPmoc'),
+                'ePmoc' => $this->input->post('ePmoc'),
+                'dPmoc' => $this->input->post('dPmoc'),
+                'vPmoc' => $this->input->post('vPmoc'),
+
                 'aOrcamento' => $this->input->post('aOrcamento'),
                 'eOrcamento' => $this->input->post('eOrcamento'),
                 'dOrcamento' => $this->input->post('dOrcamento'),
@@ -181,6 +186,11 @@ class Permissoes extends MY_Controller
                 'eOs' => $this->input->post('eOs'),
                 'dOs' => $this->input->post('dOs'),
                 'vOs' => $this->input->post('vOs'),
+
+                'aPmoc' => $this->input->post('aPmoc'),
+                'ePmoc' => $this->input->post('ePmoc'),
+                'dPmoc' => $this->input->post('dPmoc'),
+                'vPmoc' => $this->input->post('vPmoc'),
 
                 'aOrcamento' => $this->input->post('aOrcamento'),
                 'eOrcamento' => $this->input->post('eOrcamento'),

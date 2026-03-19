@@ -32,3 +32,4 @@ assets/userImage
 
 *.zip
 os_backup_*
+application/cache/deploy.lock

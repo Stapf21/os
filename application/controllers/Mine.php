@@ -10,6 +10,8 @@ class Mine extends CI_Controller
     {
         parent::__construct();
         $this->load->model('Conecte_model');
+        $this->load->model('Pmoc_model');
+        $this->load->model('Pnl_model');
         $this->load->helper('Security_helper');
     }
 
@@ -899,6 +901,82 @@ class Mine extends CI_Controller
         $this->load->view('conecte/cadastrar', $this->data);
     }
 
+    public function pmoc()
+    {
+        if (! session_id() || ! $this->session->userdata('conectado')) {
+            redirect('mine');
+        }
+
+        $clienteId = (int) $this->session->userdata('cliente_id');
+        $planoCompleto = $this->Pmoc_model->getPlanoCompletoCliente($clienteId);
+        if (! $planoCompleto) {
+            $this->session->set_flashdata('error', 'Cliente sem contrato PMOC ativo.');
+            redirect('mine/painel');
+            return;
+        }
+
+        $tipoPeriodo = $this->input->get('tipo_periodo') ?: 'mensal';
+        $periodoReferencia = $this->input->get('periodo_referencia') ?: date('Y-m');
+        $dataInicio = $this->input->get('data_inicio');
+        $dataFim = $this->input->get('data_fim');
+        [$inicio, $fim] = $this->resolverPeriodoPmocCliente($tipoPeriodo, $periodoReferencia, $dataInicio, $dataFim);
+
+        $resumo = $this->Pnl_model->getResumoCliente($clienteId, $inicio, $fim);
+        $resumoUnidades = $this->Pnl_model->getResumoPorUnidade($clienteId, $inicio, $fim);
+
+        $data['menuPmoc'] = 'pmoc';
+        $data['tipoPeriodo'] = $tipoPeriodo;
+        $data['periodoReferencia'] = $periodoReferencia;
+        $data['dataInicio'] = $inicio;
+        $data['dataFim'] = $fim;
+        $data['plano'] = $planoCompleto->plano;
+        $data['unidades'] = $planoCompleto->unidades;
+        $data['equipamentos'] = $planoCompleto->equipamentos;
+        $data['cronograma'] = $planoCompleto->cronograma;
+        $data['relatorios'] = $planoCompleto->relatorios;
+        $data['reparos'] = $planoCompleto->reparos;
+        $data['resumo_os'] = $planoCompleto->resumo_os;
+        $data['pnlResumo'] = $resumo;
+        $data['resumoUnidadesPnl'] = $resumoUnidades;
+        $data['output'] = 'conecte/pmoc';
+        $this->load->view('conecte/template', $data);
+    }
+
+    public function solicitarReparoPmoc()
+    {
+        if (! session_id() || ! $this->session->userdata('conectado')) {
+            redirect('mine');
+        }
+
+        $clienteId = (int) $this->session->userdata('cliente_id');
+        $plano = $this->Pmoc_model->getByClienteId($clienteId);
+        if (! $plano) {
+            $this->session->set_flashdata('error', 'Cliente sem contrato PMOC.');
+            redirect('mine/painel');
+            return;
+        }
+
+        $data = [
+            'plano_id' => $plano->id_pmoc,
+            'clientes_id' => $clienteId,
+            'cliente_unidade_id' => $this->input->post('cliente_unidade_id') ?: null,
+            'equipamento_id' => $this->input->post('equipamento_id') ?: null,
+            'titulo' => $this->input->post('titulo') ?: 'Solicitacao de reparo',
+            'descricao' => $this->input->post('descricao'),
+            'status' => 'aberto',
+            'origem' => 'cliente',
+            'data_solicitacao' => date('Y-m-d H:i:s'),
+        ];
+
+        if ($this->Pmoc_model->addReparo($data)) {
+            $this->session->set_flashdata('success', 'Solicitacao de reparo enviada com sucesso.');
+        } else {
+            $this->session->set_flashdata('error', 'Nao foi possivel abrir a solicitacao.');
+        }
+
+        redirect('mine/pmoc');
+    }
+
     public function downloadanexo($id = null)
     {
         if (! session_id() || ! $this->session->userdata('conectado')) {
@@ -943,6 +1021,38 @@ class Mine extends CI_Controller
         } else {
             return false;
         }
+    }
+
+    private function resolverPeriodoPmocCliente($tipoPeriodo, $periodoReferencia, $dataInicioCustom, $dataFimCustom)
+    {
+        if ($tipoPeriodo === 'anual') {
+            $ano = preg_match('/^\d{4}$/', (string) $periodoReferencia) ? $periodoReferencia : date('Y');
+            return [$ano . '-01-01', $ano . '-12-31'];
+        }
+
+        if ($tipoPeriodo === 'trimestral') {
+            if (preg_match('/^(\d{4})\-Q([1-4])$/', (string) $periodoReferencia, $m)) {
+                $ano = (int) $m[1];
+                $q = (int) $m[2];
+                $mesInicio = (($q - 1) * 3) + 1;
+                $inicio = sprintf('%04d-%02d-01', $ano, $mesInicio);
+                $fim = date('Y-m-t', strtotime($inicio . ' +2 month'));
+                return [$inicio, $fim];
+            }
+            $inicio = date('Y-m-01');
+            return [$inicio, date('Y-m-t', strtotime($inicio . ' +2 month'))];
+        }
+
+        if ($tipoPeriodo === 'personalizado' && $dataInicioCustom && $dataFimCustom) {
+            return [$dataInicioCustom, $dataFimCustom];
+        }
+
+        if (preg_match('/^\d{4}\-\d{2}$/', (string) $periodoReferencia)) {
+            $inicio = $periodoReferencia . '-01';
+            return [$inicio, date('Y-m-t', strtotime($inicio))];
+        }
+
+        return [date('Y-m-01'), date('Y-m-t')];
     }
 
     private function enviarRecuperarSenha($idClientes, $clienteEmail, $assunto, $token)

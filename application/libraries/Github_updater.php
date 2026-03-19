@@ -28,21 +28,8 @@ class Github_updater
      */
     public function has_update()
     {
-        $branches = json_decode(
-            $this->_connect(self::API_URL . $this->ci->config->item('github_user') . '/' . $this->ci->config->item('github_repo') . '/branches')
-        );
-
-        $branchToUpdateFrom = current(
-            array_filter($branches, function ($branch) {
-                return $branch->name === $this->ci->config->item('github_branch');
-            })
-        );
-
-        if (! $branchToUpdateFrom) {
-            throw new Exception('The branch to update from GitHub does not exist!');
-        }
-
-        return $branchToUpdateFrom->commit->sha !== $this->ci->config->item('current_commit');
+        $remoteHash = $this->getCurrentCommitHash();
+        return $remoteHash !== $this->ci->config->item('current_commit');
     }
 
     /**
@@ -236,21 +223,22 @@ class Github_updater
      */
     private function getCurrentCommitHash()
     {
-        $branches = json_decode(
-            $this->_connect(self::API_URL . $this->ci->config->item('github_user') . '/' . $this->ci->config->item('github_repo') . '/branches')
-        );
+        $branches = $this->getBranches();
+        $targetBranch = $this->ci->config->item('github_branch');
 
-        $branchToUpdateFrom = current(
-            array_filter($branches, function ($branch) {
-                return $branch->name === $this->ci->config->item('github_branch');
-            })
-        );
+        foreach ($branches as $branch) {
+            if (!isset($branch->name) || $branch->name !== $targetBranch) {
+                continue;
+            }
 
-        if (! $branchToUpdateFrom) {
-            throw new Exception('The branch to update from GitHub does not exist!');
+            if (!isset($branch->commit) || !isset($branch->commit->sha)) {
+                throw new Exception('The branch commit hash could not be read from GitHub.');
+            }
+
+            return $branch->commit->sha;
         }
 
-        return $branchToUpdateFrom->commit->sha;
+        throw new Exception('The branch to update from GitHub does not exist!');
     }
 
     /**
@@ -260,17 +248,44 @@ class Github_updater
      */
     private function getCurrentVersion()
     {
-        $latestRelease = json_decode(
+        $latestRelease = $this->decodeJson(
             $this->_connect(self::API_URL . $this->ci->config->item('github_user') . '/' . $this->ci->config->item('github_repo') . '/releases/latest')
         );
 
-        $version = $latestRelease->tag_name;
+        $version = isset($latestRelease->tag_name) ? $latestRelease->tag_name : null;
 
         if (! $version) {
             throw new Exception('Error getting mapos version from GitHub!');
         }
 
         return str_replace('v', '', $version);
+    }
+
+    private function getBranches()
+    {
+        $response = $this->decodeJson(
+            $this->_connect(self::API_URL . $this->ci->config->item('github_user') . '/' . $this->ci->config->item('github_repo') . '/branches')
+        );
+
+        if (is_array($response)) {
+            return $response;
+        }
+
+        if (is_object($response) && isset($response->message)) {
+            throw new Exception('GitHub API error: ' . $response->message);
+        }
+
+        throw new Exception('Invalid response while fetching branches from GitHub.');
+    }
+
+    private function decodeJson($json)
+    {
+        $decoded = json_decode($json);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('Error decoding GitHub API response: ' . json_last_error_msg());
+        }
+
+        return $decoded;
     }
 
     /**

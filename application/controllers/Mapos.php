@@ -518,6 +518,8 @@ class Mapos extends MY_Controller {
 
         $this->load->library('github_updater');
 
+        try {
+
         if (!$this->github_updater->has_update()) {
             $this->session->set_flashdata('success', 'Seu Sistema já está atualizado!');
 
@@ -526,10 +528,13 @@ class Mapos extends MY_Controller {
 
         $success = $this->github_updater->update();
 
-        if ($success) {
-            $this->session->set_flashdata('success', 'Sistema atualizado com sucesso!');
-        } else {
-            $this->session->set_flashdata('error', 'Erro ao atualizar o Sistema!');
+            if ($success) {
+                $this->session->set_flashdata('success', 'Sistema atualizado com sucesso!');
+            } else {
+                $this->session->set_flashdata('error', 'Erro ao atualizar o Sistema!');
+            }
+        } catch (Exception $e) {
+            $this->session->set_flashdata('error', 'Falha ao consultar atualizacoes no GitHub: ' . $e->getMessage());
         }
 
         return redirect(site_url('mapos/configurar'));
@@ -596,12 +601,27 @@ class Mapos extends MY_Controller {
         $escapedLog = escapeshellarg($logAbsPath);
         $command = 'cd ' . escapeshellarg(FCPATH) . ' && nohup bash ' . $escapedScript . ' >> ' . $escapedLog . ' 2>&1 &';
 
+        if (!function_exists('exec')) {
+            $dispatch = $this->dispatchGithubActionsWorkflow($deployConfig);
+            if ($dispatch['ok']) {
+                $this->session->set_flashdata('success', 'Atualizacao disparada via GitHub Actions.');
+            } else {
+                $this->session->set_flashdata('error', $dispatch['message']);
+            }
+            return redirect(site_url('mapos/atualizacoes'));
+        }
+
         $output = [];
         $resultCode = 0;
         @exec($command, $output, $resultCode);
 
         if ($resultCode !== 0) {
-            $this->session->set_flashdata('error', 'Falha ao disparar atualizacao. Verifique permissoes do script e shell na hospedagem.');
+            $dispatch = $this->dispatchGithubActionsWorkflow($deployConfig);
+            if ($dispatch['ok']) {
+                $this->session->set_flashdata('success', 'Atualizacao disparada via GitHub Actions.');
+            } else {
+                $this->session->set_flashdata('error', 'Falha ao disparar atualizacao. ' . $dispatch['message']);
+            }
         } else {
             $this->session->set_flashdata('success', 'Atualizacao disparada em segundo plano.');
         }
@@ -747,6 +767,9 @@ class Mapos extends MY_Controller {
             'lock_file' => (string) config_item('deploy_lock_file'),
             'allow_web_trigger' => (bool) config_item('deploy_allow_web_trigger'),
             'log_tail_lines' => (int) config_item('deploy_log_tail_lines'),
+            'github_repo' => trim((string) config_item('deploy_github_repo')),
+            'github_workflow' => trim((string) config_item('deploy_github_workflow')),
+            'github_token' => trim((string) config_item('deploy_github_token')),
         ];
     }
 
@@ -806,6 +829,58 @@ class Mapos extends MY_Controller {
             return null;
         }
         return trim($output);
+    }
+
+    private function dispatchGithubActionsWorkflow(array $deployConfig)
+    {
+        $repo = trim((string) ($deployConfig['github_repo'] ?? ''));
+        $workflow = trim((string) ($deployConfig['github_workflow'] ?? ''));
+        $token = trim((string) ($deployConfig['github_token'] ?? ''));
+        $branch = trim((string) ($deployConfig['branch'] ?? 'main'));
+
+        if ($repo === '' || $workflow === '' || $token === '') {
+            return ['ok' => false, 'message' => 'Configure DEPLOY_GITHUB_REPO, DEPLOY_GITHUB_WORKFLOW e DEPLOY_GITHUB_TOKEN no application/.env.'];
+        }
+
+        if (strpos($repo, '/') === false) {
+            return ['ok' => false, 'message' => 'DEPLOY_GITHUB_REPO invalido. Use formato owner/repo.'];
+        }
+
+        [$owner, $repoName] = explode('/', $repo, 2);
+        $url = 'https://api.github.com/repos/' . rawurlencode($owner) . '/' . rawurlencode($repoName) . '/actions/workflows/' . rawurlencode($workflow) . '/dispatches';
+        $payload = json_encode(['ref' => $branch !== '' ? $branch : 'main']);
+
+        if (function_exists('curl_init')) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_TIMEOUT => 20,
+                CURLOPT_HTTPHEADER => [
+                    'Accept: application/vnd.github+json',
+                    'Authorization: Bearer ' . $token,
+                    'User-Agent: mapos-deploy-dispatch',
+                    'Content-Type: application/json',
+                ],
+                CURLOPT_POSTFIELDS => $payload,
+            ]);
+            $response = curl_exec($ch);
+            $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_errno($ch) ? curl_error($ch) : '';
+            curl_close($ch);
+
+            if ($error !== '') {
+                return ['ok' => false, 'message' => 'Falha de rede ao chamar GitHub Actions: ' . $error];
+            }
+
+            if (in_array($status, [200, 201, 202, 204], true)) {
+                return ['ok' => true, 'message' => ''];
+            }
+
+            return ['ok' => false, 'message' => 'GitHub Actions recusou a requisicao (HTTP ' . $status . '). Resposta: ' . (string) $response];
+        }
+
+        return ['ok' => false, 'message' => 'cURL indisponivel no PHP para disparar GitHub Actions.'];
     }
 
     private function tailFile($filePath, $lines = 120)

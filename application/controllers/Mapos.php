@@ -609,6 +609,24 @@ class Mapos extends MY_Controller {
         return redirect(site_url('mapos/atualizacoes'));
     }
 
+    public function executarMigracoesAtualizacoes()
+    {
+        if (! $this->permission->checkPermission($this->session->userdata('permissao'), 'cSistema')) {
+            $this->session->set_flashdata('error', 'Voce nao tem permissao para configurar o sistema');
+            return redirect(base_url());
+        }
+
+        $this->load->library('migration');
+
+        if ($this->migration->latest() === false) {
+            $this->session->set_flashdata('error', 'Falha ao executar migrations: ' . $this->migration->error_string());
+        } else {
+            $this->session->set_flashdata('success', 'Migrations executadas com sucesso.');
+        }
+
+        return redirect(site_url('mapos/atualizacoes'));
+    }
+
     public function calendario()
     {
         if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {

@@ -106,6 +106,13 @@
                             <span class="button__text2">Executar atualizacao</span>
                         </button>
                     </form>
+                    <form action="<?php echo site_url('configuracoes/atualizacoes/migracoes'); ?>" method="post" style="margin:0;">
+                        <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
+                        <button type="submit" class="button btn btn-success">
+                            <span class="button__icon"><i class="bx bx-data"></i></span>
+                            <span class="button__text2">Executar migrations</span>
+                        </button>
+                    </form>
                     <a href="<?php echo site_url('configuracoes/atualizacoes'); ?>" class="button btn btn-info">
                         <span class="button__icon"><i class="bx bx-refresh"></i></span>
                         <span class="button__text2">Recarregar status</span>

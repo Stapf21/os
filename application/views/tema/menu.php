@@ -109,8 +109,8 @@
                         echo 'active';
                     }; ?>">
                         <a class="tip-bottom" title="" href="<?= site_url('pmoc') ?>"><i class='bx bx-clipboard iconX'></i>
-                            <span class="title">PMOC</span>
-                            <span class="title-tooltip">Planos de ManutenÃ§Ã£o</span>
+                            <span class="title">PMOC e Plano Mensal</span>
+                            <span class="title-tooltip">PMOC e Plano Mensal</span>
                         </a>
                     </li>
                 <?php } ?>
@@ -180,3 +180,4 @@
         </div>
     </div>
 </nav>
+

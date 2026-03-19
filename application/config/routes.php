@@ -54,6 +54,7 @@ if (filter_var($_ENV['API_ENABLED'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
 $route['upload/tinymce'] = 'upload/tinymce';
 $route['configuracoes/atualizacoes'] = 'mapos/atualizacoes';
 $route['configuracoes/atualizacoes/executar'] = 'mapos/executarAtualizacao';
+$route['configuracoes/atualizacoes/migracoes'] = 'mapos/executarMigracoesAtualizacoes';
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */

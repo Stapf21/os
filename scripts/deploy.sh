@@ -12,6 +12,7 @@ COMPOSER_BIN="${COMPOSER_BIN:-composer}"
 NPM_BIN="${NPM_BIN:-npm}"
 RUN_FRONTEND_BUILD="${RUN_FRONTEND_BUILD:-0}"
 RUN_MIGRATIONS="${RUN_MIGRATIONS:-1}"
+CLEAR_DEPLOY_LOG_ON_START="${CLEAR_DEPLOY_LOG_ON_START:-1}"
 
 if [ -n "$(git status --porcelain)" ]; then
     echo "ERRO: Repositorio com alteracoes locais. Abortando."
@@ -21,6 +22,10 @@ fi
 mkdir -p "$(dirname "$LOCK_FILE")"
 mkdir -p "$(dirname "$LOG_FILE")"
 touch "$LOG_FILE"
+
+if [ "$CLEAR_DEPLOY_LOG_ON_START" = "1" ]; then
+    : > "$LOG_FILE"
+fi
 
 if [ -f "$LOCK_FILE" ]; then
     OLD_PID="$(cat "$LOCK_FILE" 2>/dev/null || true)"

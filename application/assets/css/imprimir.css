@@ -1,0 +1,308 @@
+body, html {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 auto;
+    padding: 0;
+    font-size: 12px;
+    background: rgb(204,204,204);
+    font-family: "Roboto", sans-serif;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+.main-page {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 1mm auto;
+    padding: 7mm;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
+}
+
+.main-page img, .dados img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 10px 0;
+}
+
+.sub-page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /* height: 257mm; */
+    z-index: 1;
+}
+
+.novaPagina {
+    display: none;
+    page-break-before: always;
+}
+
+header {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cdcdcd;
+}
+
+header .alert {
+    width: 100%;
+}
+
+#imgLogo {
+    display: flex;
+    align-items: center;
+}
+
+header .emitente {
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: 3px;
+}
+
+header .contatoEmitente {
+    text-align: right;
+    max-width: 230px;
+    margin-top: 10px;
+}
+
+header .icon {
+    width: 20px;
+}
+
+section {
+    width: 100%;
+    padding: 10px 0;
+    /* border-bottom: 1px solid #ddd; */
+}
+
+section .title {
+    width: 100%;
+    border: 1px solid #cdcdcd;
+    padding: 3px;
+    font-weight: bold;
+    font-size: 1.25em;
+    text-align: center;
+    background-color: #e8e8e8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+section .title .via {
+    font-size: 13px;
+    position: absolute;
+    left: 5px;
+}
+
+.via{
+    display: none;
+}
+
+section .title .emissao {
+    font-size: 13px;
+    position: absolute;
+    right: 5px;
+}
+
+section .subtitle {
+    margin-top: 10px;
+    width: 100%;
+    border: 1px solid #cdcdcd;
+    padding: 3px;
+    font-weight: bold;
+    text-align: left;
+    background-color: #e8e8e8;
+}
+
+section .dados {
+    width: 100%;
+    border: 1px solid #cdcdcd;
+    padding: 5px;
+    font-weight: normal;
+    line-height: 1.6;
+    flex-direction: column;
+}
+
+section .dados b, section .dados strong {
+    font-weight: bold;
+}
+
+section .dados i, section .dados em {
+    font-style: italic;
+}
+
+section .dados u {
+    text-decoration: underline;
+}
+
+section .dados s, section .dados del {
+    text-decoration: line-through;
+}
+
+section .dados ul, section .dados ol {
+    margin: 10px 0 10px 20px;
+    padding-left: 20px;
+}
+
+section .dados li {
+    margin-bottom: 5px;
+}
+
+section .dados img {
+    max-width: 600px;
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 10px 0;
+}
+
+section .tabela {
+    padding-top: 10px;
+}
+section .tabela table {
+    margin-bottom: 0;
+}
+section .tabela table .table-secondary {
+    border-color: #cdcdcd;
+}
+section .tabela table tbody {
+    border-color: #cdcdcd !important;
+}
+
+.table>:not(caption)>*>* {
+    padding: .2rem .5rem;
+}
+
+section .pagamento {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+section .pagamento .qrcode {
+    display: flex;
+    justify-content: space-between;
+}
+
+section .pagamento .qrcode .chavePix {
+    width: 100%;
+    word-break: break-word;
+    margin-top:8px;
+    text-align:center;
+}
+
+section .pagamento .qrcode i {
+    font-size: 20px;
+    color: #989898;
+}
+
+section .pagamento .table {
+    width: 400px;
+    text-align: right;
+}
+
+section .pagamento .table th {
+    text-align: center;
+}
+
+section .pagamento .table tbody tr {
+    font-weight: bold;
+}
+
+footer {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cdcdcd;
+}
+
+footer .detalhes {
+    display: flex;
+    justify-content: space-between;
+}
+
+footer .assinaturas {
+    display: flex;
+    justify-content: space-around;
+}
+
+footer .assinaturas span {
+    width: 40%;
+    text-align: center;
+    border-top: 1px solid #000;
+    margin-top: 55px;
+}
+
+footer .vendedor {
+    display: flex;
+    text-align: center;
+    justify-content: space-around;
+}
+
+#anexos {
+    display: none;
+    page-break-before: always;
+}
+
+#anexos section img {
+    flex: 1 0 30%;
+    max-width: 150px;
+    /* max-height: 200px; */
+    height: auto;
+    object-fit: cover;
+    margin: 5px;
+}
+
+#anexos .dados img {
+    max-width: 160mm !important;
+    max-height: 220mm !important;
+    width: auto !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 auto 10px auto !important;
+    box-shadow: 0 0 8px #ccc !important;
+    border-radius: 6px !important;
+}
+
+@page {
+    size: auto;
+    margin: 0.5cm;
+}
+
+@media print {
+    html, body {
+        width: 210mm !important;
+        min-height: 297mm !important;
+        background: white !important;
+    }
+    .main-page {
+        width: 210mm !important;
+        min-height: 297mm !important;
+        margin: 0;
+        border: initial;
+        border-radius: initial;
+        box-shadow: initial;
+        background: initial;
+        page-break-after: always;
+    }
+
+    .via{
+        display: block;
+    }
+    
+    #anexos {
+        display: block;
+    }
+
+    .novaPagina {
+        display: block;
+    }
+}

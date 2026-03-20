@@ -435,6 +435,7 @@
   font-weight: 600;
   padding: 6px 10px;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .pmoc-dash .pmoc-status-pill,
@@ -464,6 +465,20 @@
 
 .pmoc-dash .pmoc-status-pill.active,
 .pmoc-cl .pmoc-status-pill.active {
+  background: var(--pmoc-primary-soft);
+  border-color: hsl(213.1 93.9% 67.8%);
+  color: hsl(224.3 76.3% 48%);
+}
+
+.pmoc-dash .pmoc-tab-panel {
+  display: none;
+}
+
+.pmoc-dash .pmoc-tab-panel.is-active {
+  display: block;
+}
+
+.pmoc-dash .pmoc-quick-nav .pmoc-nav-btn.active {
   background: var(--pmoc-primary-soft);
   border-color: hsl(213.1 93.9% 67.8%);
   color: hsl(224.3 76.3% 48%);

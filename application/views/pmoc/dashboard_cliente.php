@@ -70,16 +70,16 @@ $statusLabels = [
         </div>
     </div>
 
-    <div class="pmoc-quick-nav">
-        <a href="#sec-unidades" class="pmoc-nav-btn">Unidades</a>
-        <a href="#sec-cronograma" class="pmoc-nav-btn">Cronograma</a>
-        <a href="#sec-equipamentos" class="pmoc-nav-btn">Equipamentos</a>
-        <a href="#sec-relatorios" class="pmoc-nav-btn">Relatorios</a>
-        <a href="#sec-reparos" class="pmoc-nav-btn">Reparos</a>
-        <a href="#sec-financeiro" class="pmoc-nav-btn">P&L</a>
+    <div class="pmoc-quick-nav" data-tab-nav>
+        <button type="button" class="pmoc-nav-btn active" data-tab="unidades">Unidades</button>
+        <button type="button" class="pmoc-nav-btn" data-tab="cronograma">Cronograma</button>
+        <button type="button" class="pmoc-nav-btn" data-tab="equipamentos">Equipamentos</button>
+        <button type="button" class="pmoc-nav-btn" data-tab="relatorios">Relatorios</button>
+        <button type="button" class="pmoc-nav-btn" data-tab="reparos">Reparos</button>
+        <button type="button" class="pmoc-nav-btn" data-tab="financeiro">P&L</button>
     </div>
 
-    <div class="widget-box pmoc-section" id="sec-unidades">
+    <div class="widget-box pmoc-section pmoc-tab-panel is-active" id="sec-unidades" data-tab-panel="unidades">
         <div class="widget-content" style="padding: 14px;">
             <div class="pmoc-section-head" style="margin-bottom:10px;">
                 <h4 class="pmoc-section-title">Unidades do cliente</h4>
@@ -123,7 +123,7 @@ $statusLabels = [
         </div>
     </div>
 
-    <div class="widget-box pmoc-section" id="sec-cronograma">
+    <div class="widget-box pmoc-section pmoc-tab-panel" id="sec-cronograma" data-tab-panel="cronograma">
         <div class="widget-content" style="padding: 14px;">
             <div class="pmoc-section-head" style="margin-bottom: 10px;">
                 <h4 class="pmoc-section-title">Cronograma de manutencao (12 ciclos)</h4>
@@ -138,6 +138,13 @@ $statusLabels = [
                         <button type="submit" class="btn btn-primary btn-small">Criar nova OS PMOC</button>
                     </form>
                 </div>
+            </div>
+            <div class="pmoc-status-pills" data-status-filter="#tb-cronograma">
+                <button type="button" class="pmoc-status-pill active" data-status="">Todos</button>
+                <button type="button" class="pmoc-status-pill" data-status="agendado">Agendado</button>
+                <button type="button" class="pmoc-status-pill" data-status="pendente">Pendente</button>
+                <button type="button" class="pmoc-status-pill" data-status="concluido">Concluido</button>
+                <button type="button" class="pmoc-status-pill" data-status="atrasado">Atrasado</button>
             </div>
             <div class="pmoc-search">
                 <input type="text" placeholder="Buscar por data, status ou OS..." data-table-search="#tb-cronograma">
@@ -159,7 +166,7 @@ $statusLabels = [
                                     $statusClass = 'pmoc-tag-warning';
                                 }
                             ?>
-                            <tr>
+                            <tr data-status="<?= htmlspecialchars((string) $statusKey) ?>">
                                 <td><?= date('d/m/Y', strtotime($item->data_prevista)) ?></td>
                                 <td><span class="pmoc-tag <?= $statusClass ?>"><?= $statusLabel ?></span></td>
                                 <td>
@@ -193,7 +200,7 @@ $statusLabels = [
         </div>
     </div>
 
-    <div class="widget-box pmoc-section" id="sec-equipamentos">
+    <div class="widget-box pmoc-section pmoc-tab-panel" id="sec-equipamentos" data-tab-panel="equipamentos">
         <div class="widget-content" style="padding: 14px;">
             <div class="pmoc-section-head" style="margin-bottom: 10px;">
                 <h4 class="pmoc-section-title">Equipamentos</h4>
@@ -247,7 +254,7 @@ $statusLabels = [
         </div>
     </div>
 
-    <div class="widget-box pmoc-section" id="sec-relatorios">
+    <div class="widget-box pmoc-section pmoc-tab-panel" id="sec-relatorios" data-tab-panel="relatorios">
         <div class="widget-content" style="padding: 14px;">
             <div class="pmoc-section-head" style="margin-bottom:10px;">
                 <h4 class="pmoc-section-title">Relatorios de manutencao</h4>
@@ -280,7 +287,7 @@ $statusLabels = [
         </div>
     </div>
 
-    <div class="widget-box pmoc-section" id="sec-reparos">
+    <div class="widget-box pmoc-section pmoc-tab-panel" id="sec-reparos" data-tab-panel="reparos">
         <div class="widget-content" style="padding: 14px;">
             <div class="pmoc-section-head" style="margin-bottom:10px;">
                 <h4 class="pmoc-section-title">Solicitacoes de reparo</h4>
@@ -368,7 +375,7 @@ $statusLabels = [
         </div>
     </div>
 
-    <div class="widget-box pmoc-section" id="sec-financeiro">
+    <div class="widget-box pmoc-section pmoc-tab-panel" id="sec-financeiro" data-tab-panel="financeiro">
         <div class="widget-content" style="padding: 14px;">
             <div class="pmoc-section-head" style="margin-bottom:10px;">
                 <h4 class="pmoc-section-title">Painel financeiro do contrato (P&L)</h4>
@@ -438,33 +445,23 @@ $statusLabels = [
         return (v || '').toString().toLowerCase();
     }
 
-    document.querySelectorAll('.pmoc-nav-btn').forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-            var id = btn.getAttribute('href');
-            if (!id || id.charAt(0) !== '#') return;
-            var target = document.querySelector(id);
-            if (!target) return;
-            e.preventDefault();
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    function abrirAba(tab) {
+        if (!tab) return;
+        document.querySelectorAll('[data-tab-nav] .pmoc-nav-btn').forEach(function (b) {
+            b.classList.toggle('active', b.getAttribute('data-tab') === tab);
+        });
+        document.querySelectorAll('.pmoc-tab-panel').forEach(function (panel) {
+            panel.classList.toggle('is-active', panel.getAttribute('data-tab-panel') === tab);
+        });
+    }
+
+    document.querySelectorAll('[data-tab-nav] .pmoc-nav-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            abrirAba(btn.getAttribute('data-tab'));
         });
     });
 
-    document.querySelectorAll('.pmoc-section').forEach(function (section) {
-        var head = section.querySelector('.pmoc-section-head');
-        var body = section.querySelector('.pmoc-table-wrap') || section.querySelector('.widget-content');
-        if (!head || !body) return;
-        if (head.querySelector('.pmoc-toggle-btn')) return;
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'pmoc-toggle-btn';
-        btn.textContent = 'Ocultar';
-        btn.addEventListener('click', function () {
-            var hidden = body.style.display === 'none';
-            body.style.display = hidden ? '' : 'none';
-            btn.textContent = hidden ? 'Ocultar' : 'Expandir';
-        });
-        head.appendChild(btn);
-    });
+    abrirAba('unidades');
 
     document.querySelectorAll('[data-table-search]').forEach(function (input) {
         var table = document.querySelector(input.getAttribute('data-table-search'));

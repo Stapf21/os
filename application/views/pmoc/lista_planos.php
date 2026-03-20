@@ -17,6 +17,19 @@
     </div>
 
     <div class="widget-box" style="margin-top: 8px">
+        <div class="widget-content" style="padding: 10px 12px; border-bottom: 1px solid #dfe5f0;">
+            <form method="get" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:0;">
+                <input type="text" name="q" value="<?= htmlspecialchars((string) ($filtros['q'] ?? '')) ?>" placeholder="Buscar por cliente ou plano" style="min-width:260px;">
+                <select name="status" style="width:180px;">
+                    <option value="">Todos os status</option>
+                    <option value="ativo" <?= (($filtros['status'] ?? '') === 'ativo') ? 'selected' : '' ?>>Ativo</option>
+                    <option value="suspenso" <?= (($filtros['status'] ?? '') === 'suspenso') ? 'selected' : '' ?>>Suspenso</option>
+                    <option value="inativo" <?= (($filtros['status'] ?? '') === 'inativo') ? 'selected' : '' ?>>Inativo</option>
+                </select>
+                <button class="btn btn-primary btn-small">Filtrar</button>
+                <a href="<?= base_url('pmoc') ?>" class="btn btn-small">Limpar</a>
+            </form>
+        </div>
         <div class="widget-content nopadding">
             <div class="table-responsive">
                 <table class="table table-bordered">

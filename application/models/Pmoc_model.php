@@ -1,4 +1,4 @@
-<?php
+ï»¿<?php
 
 defined('BASEPATH') or exit('No direct script access allowed');
 
@@ -18,12 +18,33 @@ class Pmoc_model extends CI_Model
         parent::__construct();
     }
 
-    public function getAll()
+    public function getAll($filters = [])
     {
         $this->db->select('pmoc_planos.*, clientes.nomeCliente, usuarios.nome as tecnico_nome');
         $this->db->from('pmoc_planos');
         $this->db->join('clientes', 'clientes.idClientes = pmoc_planos.clientes_id');
         $this->db->join('usuarios', 'usuarios.idUsuarios = pmoc_planos.tecnico_responsavel', 'left');
+
+        if (!empty($filters['status'])) {
+            $status = mb_strtolower(trim((string) $filters['status']));
+            $this->db->group_start();
+            if ($this->db->field_exists('status_contrato', 'pmoc_planos')) {
+                $this->db->where('LOWER(pmoc_planos.status_contrato)', $status);
+            }
+            $this->db->or_where('LOWER(pmoc_planos.status)', $status);
+            $this->db->group_end();
+        }
+
+        if (!empty($filters['q'])) {
+            $q = trim((string) $filters['q']);
+            $this->db->group_start();
+            $this->db->like('clientes.nomeCliente', $q);
+            if ($this->db->field_exists('nome_plano', 'pmoc_planos')) {
+                $this->db->or_like('pmoc_planos.nome_plano', $q);
+            }
+            $this->db->group_end();
+        }
+
         $this->db->order_by('pmoc_planos.id_pmoc', 'desc');
         $planos = $this->db->get()->result();
 
@@ -242,11 +263,11 @@ class Pmoc_model extends CI_Model
             return 'agendado';
         }
 
-        if (in_array($status, ['em execucao', 'em execução', 'em andamento'], true)) {
+        if (in_array($status, ['em execucao', 'em execuÃ§Ã£o', 'em andamento'], true)) {
             return 'em_execucao';
         }
 
-        if (in_array($status, ['concluido', 'concluído', 'finalizado'], true)) {
+        if (in_array($status, ['concluido', 'concluÃ­do', 'finalizado'], true)) {
             return 'concluido';
         }
 
@@ -257,3 +278,4 @@ class Pmoc_model extends CI_Model
         return 'pendente';
     }
 }
+

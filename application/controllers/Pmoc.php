@@ -26,7 +26,13 @@ class Pmoc extends MY_Controller
 
     public function index()
     {
-        $this->data['planos'] = $this->pmoc_model->getAll();
+        $filtros = [
+            'status' => $this->input->get('status') ?: null,
+            'q' => $this->input->get('q') ?: null,
+        ];
+
+        $this->data['filtros'] = $filtros;
+        $this->data['planos'] = $this->pmoc_model->getAll($filtros);
         $this->data['view'] = 'pmoc/lista_planos';
         return $this->layout();
     }
@@ -146,7 +152,7 @@ class Pmoc extends MY_Controller
             'empresa' => $this->input->post('empresa'),
             'codigo' => $this->input->post('codigo'),
             'cidade' => $this->input->post('cidade'),
-            'estado' => $this->input->post('estado'),
+            'estado' => mb_strtoupper(substr(trim((string) $this->input->post('estado')), 0, 2)),
             'ativa' => $this->input->post('ativa') ? 1 : 0,
             'created_at' => date('Y-m-d H:i:s'),
         ];

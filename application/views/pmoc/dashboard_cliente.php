@@ -93,7 +93,7 @@ $margem = $receita > 0 ? ($lucro / $receita) * 100 : 0;
             </table>
             <div style="padding: 0 10px 10px; display:flex; gap:8px; flex-wrap:wrap;">
                 <a href="<?= base_url('pmoc/criar_os_pmoc/' . $plano->id_pmoc) ?>" class="btn btn-primary">Criar nova OS PMOC</a>
-                <a href="<?= base_url('equipamentos/novo?cliente_id=' . $plano->clientes_id) ?>" class="btn btn-success">Adicionar equipamento</a>
+                <a href="<?= base_url('equipamentos/novo?cliente_id=' . $plano->clientes_id . '&unidade_id=' . (int) $unidadeId) ?>" class="btn btn-success">Adicionar equipamento</a>
             </div>
         </div>
     </div>

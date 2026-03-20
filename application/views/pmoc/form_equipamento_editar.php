@@ -16,6 +16,38 @@
                 <input type="hidden" name="cliente_id" value="<?= $cliente_id ?? '' ?>">
                 <div class="widget-content nopadding tab-content">
                     <div class="row-fluid">
+                        <div class="span6">
+                            <div class="control-group">
+                                <label class="control-label">Unidade</label>
+                                <div class="controls">
+                                    <select name="cliente_unidade_id" class="span12">
+                                        <option value="">Sem unidade</option>
+                                        <?php foreach (($unidades ?? []) as $u): ?>
+                                            <option value="<?= (int) $u->idClienteUnidade ?>" <?= ((int) ($equipamento->cliente_unidade_id ?? 0) === (int) $u->idClienteUnidade) ? 'selected' : '' ?>>
+                                                <?= htmlspecialchars((string) $u->nome) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="span6">
+                            <div class="control-group">
+                                <label class="control-label">Tipo de equipamento</label>
+                                <div class="controls">
+                                    <select name="tipo_equipamento" class="span12">
+                                        <option value="">Selecione</option>
+                                        <option value="split" <?= ($equipamento->tipo_equipamento ?? '') === 'split' ? 'selected' : '' ?>>Split</option>
+                                        <option value="cassete" <?= ($equipamento->tipo_equipamento ?? '') === 'cassete' ? 'selected' : '' ?>>Cassete</option>
+                                        <option value="piso_teto" <?= ($equipamento->tipo_equipamento ?? '') === 'piso_teto' ? 'selected' : '' ?>>Piso teto</option>
+                                        <option value="self_contained" <?= ($equipamento->tipo_equipamento ?? '') === 'self_contained' ? 'selected' : '' ?>>Self contained</option>
+                                        <option value="outro" <?= ($equipamento->tipo_equipamento ?? '') === 'outro' ? 'selected' : '' ?>>Outro</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row-fluid">
                         <div class="span12">
                             <div class="control-group">
                                 <label class="control-label">Descrição*</label>

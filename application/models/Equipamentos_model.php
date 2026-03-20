@@ -11,16 +11,38 @@ class Equipamentos_model extends CI_Model
     public function getByClienteId($clientes_id, $cliente_unidade_id = null)
     {
         $this->db->select('equipamentos.*');
+        $this->db->from('equipamentos');
+
         if ($this->db->table_exists('cliente_unidades') && $this->db->field_exists('cliente_unidade_id', 'equipamentos')) {
             $this->db->select('cliente_unidades.nome as unidade_nome');
             $this->db->join('cliente_unidades', 'cliente_unidades.idClienteUnidade = equipamentos.cliente_unidade_id', 'left');
         }
-        $this->db->where('clientes_id', $clientes_id);
+
+        $this->db->where('equipamentos.clientes_id', $clientes_id);
         if ($cliente_unidade_id && $this->db->field_exists('cliente_unidade_id', 'equipamentos')) {
-            $this->db->where('cliente_unidade_id', $cliente_unidade_id);
+            $this->db->where('equipamentos.cliente_unidade_id', $cliente_unidade_id);
         }
-        $this->db->order_by('descricao', 'asc');
-        return $this->db->get('equipamentos')->result();
+
+        if ($this->db->field_exists('descricao', 'equipamentos')) {
+            $this->db->order_by('equipamentos.descricao', 'asc');
+        } elseif ($this->db->field_exists('equipamento', 'equipamentos')) {
+            $this->db->order_by('equipamentos.equipamento', 'asc');
+        } else {
+            $this->db->order_by('equipamentos.idEquipamentos', 'desc');
+        }
+
+        $query = $this->db->get();
+        if (! $query || ! is_object($query)) {
+            $dbError = $this->db->error();
+            log_message(
+                'error',
+                'Erro ao buscar equipamentos por cliente. Query: ' . $this->db->last_query()
+                . ' | DB Error: ' . json_encode($dbError)
+            );
+            return [];
+        }
+
+        return $query->result();
     }
 
     // Buscar equipamentos com falha nos últimos X meses

@@ -31,8 +31,33 @@ class Pmoc extends MY_Controller
             'q' => $this->input->get('q') ?: null,
         ];
 
+        $planos = $this->pmoc_model->getAll($filtros);
+        $stats = [
+            'total_planos' => 0,
+            'ativos' => 0,
+            'suspensos' => 0,
+            'inativos' => 0,
+            'receita_mensal' => 0.0,
+            'reparos_abertos' => 0,
+        ];
+
+        foreach ($planos as $plano) {
+            $stats['total_planos']++;
+            $status = mb_strtolower((string) ($plano->status_contrato ?: $plano->status));
+            if ($status === 'ativo') {
+                $stats['ativos']++;
+            } elseif ($status === 'suspenso') {
+                $stats['suspensos']++;
+            } elseif ($status === 'inativo') {
+                $stats['inativos']++;
+            }
+            $stats['receita_mensal'] += (float) $plano->valor_mensal;
+            $stats['reparos_abertos'] += (int) $plano->total_reparos_abertos;
+        }
+
         $this->data['filtros'] = $filtros;
-        $this->data['planos'] = $this->pmoc_model->getAll($filtros);
+        $this->data['planos'] = $planos;
+        $this->data['statsPmoc'] = $stats;
         $this->data['view'] = 'pmoc/lista_planos';
         return $this->layout();
     }

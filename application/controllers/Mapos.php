@@ -809,7 +809,14 @@ class Mapos extends MY_Controller {
         }
 
         $status['git_current'] = $this->safeShell('git rev-parse --short HEAD');
+        if (empty($status['git_current'])) {
+            $status['git_current'] = $this->getLocalGitCommitFromFiles();
+        }
+
         $status['git_remote'] = $this->safeShell('git rev-parse --short ' . escapeshellarg('origin/' . $branch));
+        if (empty($status['git_remote'])) {
+            $status['git_remote'] = $this->getRemoteGitCommitFromGithubApi($deployConfig, $branch);
+        }
         $gitDirty = $this->safeShell('git status --porcelain');
         $status['git_clean'] = $gitDirty !== null ? trim($gitDirty) === '' : null;
         $status['log_tail'] = $this->tailFile($logAbsPath, max(10, $deployConfig['log_tail_lines']));
@@ -829,6 +836,76 @@ class Mapos extends MY_Controller {
             return null;
         }
         return trim($output);
+    }
+
+    private function getLocalGitCommitFromFiles()
+    {
+        $headPath = FCPATH . '.git/HEAD';
+        if (!is_file($headPath)) {
+            return null;
+        }
+
+        $head = trim((string) @file_get_contents($headPath));
+        if ($head === '') {
+            return null;
+        }
+
+        if (strpos($head, 'ref: ') === 0) {
+            $ref = trim(substr($head, 5));
+            $refPath = FCPATH . '.git/' . $ref;
+            if (!is_file($refPath)) {
+                return null;
+            }
+            $sha = trim((string) @file_get_contents($refPath));
+            return $sha !== '' ? substr($sha, 0, 7) : null;
+        }
+
+        return substr($head, 0, 7);
+    }
+
+    private function getRemoteGitCommitFromGithubApi(array $deployConfig, $branch)
+    {
+        $repo = trim((string) ($deployConfig['github_repo'] ?? ''));
+        $token = trim((string) ($deployConfig['github_token'] ?? ''));
+        if ($repo === '' || strpos($repo, '/') === false) {
+            return null;
+        }
+
+        [$owner, $repoName] = explode('/', $repo, 2);
+        $url = 'https://api.github.com/repos/' . rawurlencode($owner) . '/' . rawurlencode($repoName) . '/commits/' . rawurlencode($branch);
+
+        if (!function_exists('curl_init')) {
+            return null;
+        }
+
+        $headers = [
+            'Accept: application/vnd.github+json',
+            'User-Agent: mapos-deploy-status',
+        ];
+        if ($token !== '') {
+            $headers[] = 'Authorization: Bearer ' . $token;
+        }
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 20,
+            CURLOPT_HTTPHEADER => $headers,
+        ]);
+        $response = curl_exec($ch);
+        $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if (!is_string($response) || $status < 200 || $status >= 300) {
+            return null;
+        }
+
+        $decoded = json_decode($response, true);
+        if (!is_array($decoded) || empty($decoded['sha'])) {
+            return null;
+        }
+
+        return substr($decoded['sha'], 0, 7);
     }
 
     private function dispatchGithubActionsWorkflow(array $deployConfig)

@@ -771,3 +771,124 @@
     grid-template-columns: 1fr;
   }
 }
+.pmoc-checklist .pmoc-checklist-chip-row {
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+}
+
+.pmoc-checklist .pmoc-checklist-form {
+  margin: 0;
+}
+
+.pmoc-checklist .pmoc-checklist-top-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.pmoc-checklist .pmoc-checklist-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pmoc-checklist .pmoc-checklist-field span {
+  font-size: 12px;
+  color: var(--pmoc-muted);
+  font-weight: 600;
+}
+
+.pmoc-checklist .pmoc-checklist-progress {
+  margin-top: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--pmoc-border);
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px;
+}
+
+.pmoc-checklist .pmoc-checklist-progress-label {
+  font-size: 12px;
+  color: var(--pmoc-muted);
+}
+
+.pmoc-checklist .pmoc-checklist-progress-track {
+  margin-top: 7px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--pmoc-bg);
+  overflow: hidden;
+}
+
+.pmoc-checklist .pmoc-checklist-progress-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(135deg, var(--pmoc-accent-a), var(--pmoc-accent-b));
+  transition: width .2s ease;
+}
+
+.pmoc-checklist .pmoc-checklist-progress-text {
+  margin-top: 7px;
+  font-size: 12px;
+  color: var(--pmoc-muted);
+}
+
+.pmoc-checklist .pmoc-checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.pmoc-checklist .pmoc-checklist-card {
+  border: 1px solid var(--pmoc-border);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: var(--pmoc-shadow);
+}
+
+.pmoc-checklist .pmoc-checklist-card h4 {
+  margin: 0;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--pmoc-border);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.pmoc-checklist .pmoc-checklist-card-body {
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.pmoc-checklist .pmoc-file-count {
+  color: var(--pmoc-muted);
+  font-size: 11px;
+}
+
+.pmoc-checklist .pmoc-checklist-notes {
+  margin-top: 12px;
+  border: 1px solid var(--pmoc-border);
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px;
+}
+
+.pmoc-checklist .pmoc-checklist-notes textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+@media (max-width: 1080px) {
+  .pmoc-checklist .pmoc-checklist-top-grid {
+    grid-template-columns: repeat(2, minmax(170px, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .pmoc-checklist .pmoc-checklist-chip-row,
+  .pmoc-checklist .pmoc-checklist-top-grid,
+  .pmoc-checklist .pmoc-checklist-grid {
+    grid-template-columns: 1fr;
+  }
+}

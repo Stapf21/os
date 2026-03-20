@@ -13,6 +13,7 @@ class Mine extends CI_Controller
         $this->load->model('Pmoc_model');
         $this->load->model('Pnl_model');
         $this->load->helper('Security_helper');
+        $this->aplicarRestricaoClientePmoc();
     }
 
     public function index()
@@ -277,6 +278,11 @@ class Mine extends CI_Controller
     {
         if (! session_id() || ! $this->session->userdata('conectado')) {
             redirect('mine');
+        }
+
+        if ($this->session->userdata('cliente_pmoc_only')) {
+            redirect('mine/pmoc');
+            return;
         }
 
         $data['menuPainel'] = 'painel';
@@ -1204,6 +1210,59 @@ class Mine extends CI_Controller
             ];
             $this->email_model->add('email_queue', $email);
         }
+    }
+
+    private function aplicarRestricaoClientePmoc()
+    {
+        if (! session_id() || ! $this->session->userdata('conectado')) {
+            return;
+        }
+
+        $clienteId = (int) $this->session->userdata('cliente_id');
+        if ($clienteId <= 0) {
+            return;
+        }
+
+        $clientePmocOnly = $this->clienteEhPlanoMensal($clienteId);
+        $this->session->set_userdata('cliente_pmoc_only', $clientePmocOnly ? 1 : 0);
+
+        if (! $clientePmocOnly) {
+            return;
+        }
+
+        $metodoAtual = (string) $this->router->fetch_method();
+        $metodosPermitidos = [
+            'pmoc',
+            'solicitarReparoPmoc',
+            'downloadanexo',
+            'sair',
+        ];
+
+        if (! in_array($metodoAtual, $metodosPermitidos, true)) {
+            redirect('mine/pmoc');
+            exit;
+        }
+    }
+
+    private function clienteEhPlanoMensal($clienteId)
+    {
+        $plano = $this->Pmoc_model->getByClienteId((int) $clienteId);
+        if (! $plano) {
+            return false;
+        }
+
+        $status = '';
+        if (isset($plano->status_contrato)) {
+            $status = mb_strtolower(trim((string) $plano->status_contrato));
+        } elseif (isset($plano->status)) {
+            $status = mb_strtolower(trim((string) $plano->status));
+        }
+
+        if ($status === 'inativo' || $status === 'cancelado' || $status === 'encerrado') {
+            return false;
+        }
+
+        return true;
     }
 
     public function captcha()

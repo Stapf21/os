@@ -1,8 +1,11 @@
+<?php
+$clientePmocOnly = (bool) $this->session->userdata('cliente_pmoc_only');
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
-    <title>Área do Cliente - <?php echo $this->config->item('app_name') ?></title>
+    <title>Area do Cliente - <?php echo $this->config->item('app_name') ?></title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="<?php echo $this->config->item('app_name') . ' - ' . $this->config->item('app_subname') ?>">
@@ -33,8 +36,10 @@
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class='bx bx-user-circle iconN1'></i> <?= $this->session->userdata('nome') ?> </a>
                     <ul class="dropdown-menu">
-                        <li class=""><a title="Meu Perfil" href="<?php echo base_url() ?>index.php/mine/conta"><i class="fas fa-user"></i> <span class="text">Meu Perfil</span></a></li>
-                        <li class="divider"></li>
+                        <?php if (! $clientePmocOnly): ?>
+                            <li class=""><a title="Meu Perfil" href="<?php echo base_url() ?>index.php/mine/conta"><i class="fas fa-user"></i> <span class="text">Meu Perfil</span></a></li>
+                            <li class="divider"></li>
+                        <?php endif; ?>
                         <li class=""><a title="Sair" href="<?php echo base_url() ?>index.php/mine/sair"><i class="fas fa-sign-out-alt"></i> <span class="text">Sair</span></a></li>
                     </ul>
                 </li>
@@ -59,18 +64,22 @@
         <div class="menu-bar">
             <div class="menu">
                 <ul class="menu-links" style="position: relative;">
-                    <li class="<?php if (isset($menuPainel)) { echo 'active'; } ?>"><a class="tip-bottom" href="<?php echo base_url() ?>index.php/mine/painel"><i class='bx bx-home-alt iconX'></i> <span class="title">Painel</span></a></li>
-                    <li class="<?php if (isset($menuConta)) { echo 'active'; } ?>"><a class="tip-bottom" href="<?php echo base_url() ?>index.php/mine/conta"><i class="bx bx-user-circle iconX"></i> <span class="title">Minha Conta</span></a></li>
-                    <li class="<?php if (isset($menuOs)) { echo 'active'; } ?>"><a class="tip-bottom" href="<?php echo base_url() ?>index.php/mine/os"><i class='bx bx-spreadsheet iconX'></i> <span class="title">Ordens de Serviço</span></a></li>
-                    <li class="<?php if (isset($menuVendas)) { echo 'active'; } ?>"><a class="tip-bottom" href="<?php echo base_url() ?>index.php/mine/compras"><i class='bx bx-cart-alt iconX'></i> <span class="title">Compras</span></a></li>
-                    <li class="<?php if (isset($menuCobrancas)) { echo 'active'; } ?>"><a class="tip-bottom" href="<?php echo base_url() ?>index.php/mine/cobrancas"><i class='bx bx-credit-card-front iconX'></i> <span class="title">Cobranças</span></a></li>
-                    <li class="<?php if (isset($menuPmoc)) { echo 'active'; } ?>"><a class="tip-bottom" href="<?php echo base_url() ?>index.php/mine/pmoc"><i class='bx bx-clipboard iconX'></i> <span class="title">PMOC e Plano</span></a></li>
+                    <?php if ($clientePmocOnly): ?>
+                        <li class="<?php if (isset($menuPmoc)) { echo 'active'; } ?>"><a class="tip-bottom" href="<?php echo base_url() ?>index.php/mine/pmoc"><i class='bx bx-clipboard iconX'></i> <span class="title">PMOC e Plano</span></a></li>
+                    <?php else: ?>
+                        <li class="<?php if (isset($menuPainel)) { echo 'active'; } ?>"><a class="tip-bottom" href="<?php echo base_url() ?>index.php/mine/painel"><i class='bx bx-home-alt iconX'></i> <span class="title">Painel</span></a></li>
+                        <li class="<?php if (isset($menuConta)) { echo 'active'; } ?>"><a class="tip-bottom" href="<?php echo base_url() ?>index.php/mine/conta"><i class="bx bx-user-circle iconX"></i> <span class="title">Minha Conta</span></a></li>
+                        <li class="<?php if (isset($menuOs)) { echo 'active'; } ?>"><a class="tip-bottom" href="<?php echo base_url() ?>index.php/mine/os"><i class='bx bx-spreadsheet iconX'></i> <span class="title">Ordens de Servico</span></a></li>
+                        <li class="<?php if (isset($menuVendas)) { echo 'active'; } ?>"><a class="tip-bottom" href="<?php echo base_url() ?>index.php/mine/compras"><i class='bx bx-cart-alt iconX'></i> <span class="title">Compras</span></a></li>
+                        <li class="<?php if (isset($menuCobrancas)) { echo 'active'; } ?>"><a class="tip-bottom" href="<?php echo base_url() ?>index.php/mine/cobrancas"><i class='bx bx-credit-card-front iconX'></i> <span class="title">Cobrancas</span></a></li>
+                        <li class="<?php if (isset($menuPmoc)) { echo 'active'; } ?>"><a class="tip-bottom" href="<?php echo base_url() ?>index.php/mine/pmoc"><i class='bx bx-clipboard iconX'></i> <span class="title">PMOC e Plano</span></a></li>
+                    <?php endif; ?>
                 </ul>
             </div>
 
             <div class="botton-content">
                 <li>
-                    <a class="tip-bottom" href="<?= site_url('login/sair'); ?>">
+                    <a class="tip-bottom" href="<?= site_url('mine/sair'); ?>">
                         <i class='bx bx-log-out-circle iconX'></i>
                         <span class="title">Sair</span>
                     </a>
@@ -81,7 +90,13 @@
 
     <div style="background: #f3f4f6" id="content">
         <div class="content-header" id="content-header">
-            <div id="breadcrumb"><a href="<?php echo base_url(); ?>index.php/mine/painel" title="Painel" class="tip-bottom"><i class="fas fa-home"></i> Painel</a></div>
+            <div id="breadcrumb">
+                <?php if ($clientePmocOnly): ?>
+                    <a href="<?php echo base_url(); ?>index.php/mine/pmoc" title="PMOC e Plano" class="tip-bottom"><i class="fas fa-clipboard"></i> PMOC e Plano</a>
+                <?php else: ?>
+                    <a href="<?php echo base_url(); ?>index.php/mine/painel" title="Painel" class="tip-bottom"><i class="fas fa-home"></i> Painel</a>
+                <?php endif; ?>
+            </div>
         </div>
 
         <div class="container-fluid">
@@ -97,7 +112,7 @@
 
     <div class="row-fluid">
         <div id="footer" class="span12">
-            <?= date('Y') ?> &copy; <?php echo $this->config->item('app_name'); ?> - Versão: <?php echo $this->config->item('app_version'); ?>
+            <?= date('Y') ?> &copy; <?php echo $this->config->item('app_name'); ?> - Versao: <?php echo $this->config->item('app_version'); ?>
         </div>
     </div>
 

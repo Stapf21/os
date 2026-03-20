@@ -113,6 +113,74 @@ foreach (($reparos ?? []) as $rep) {
 .pmoc-cl .pmoc-form input, .pmoc-cl .pmoc-form select { margin:0; }
 .pmoc-cl .pmoc-table-wrap { overflow-x:auto; }
 .pmoc-cl .pmoc-reparo-resumo { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.pmoc-cl .pmoc-cl-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+}
+.pmoc-cl .pmoc-nav-btn {
+    border: 1px solid var(--line);
+    background: var(--soft);
+    color: var(--text);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 10px;
+    text-decoration: none;
+}
+.pmoc-cl .pmoc-nav-btn:hover {
+    text-decoration: none;
+}
+.pmoc-cl .pmoc-cl-box.pmoc-section {
+    scroll-margin-top: 70px;
+}
+.pmoc-cl .pmoc-search {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+.pmoc-cl .pmoc-search input {
+    margin: 0;
+    min-width: 250px;
+}
+.pmoc-cl .pmoc-toggle-btn {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--muted);
+    border-radius: 8px;
+    font-size: 12px;
+    padding: 4px 8px;
+}
+.pmoc-cl .pmoc-status-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 0 0 8px;
+}
+.pmoc-cl .pmoc-status-pill {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--text);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.pmoc-cl .pmoc-status-pill.active {
+    background: #edf7ff;
+    border-color: #bcdcf5;
+    color: #1f6b97;
+}
+.pmoc-cl .pmoc-table-hover tbody tr:hover {
+    background: #f6fbff;
+}
 @media (max-width: 920px) {
     .pmoc-cl .pmoc-cl-info,
     .pmoc-cl .pmoc-cl-kpi {
@@ -139,6 +207,14 @@ foreach (($reparos ?? []) as $rep) {
         </div>
     </div>
 
+    <div class="pmoc-cl-nav">
+        <a href="#cl-sec-solicitar" class="pmoc-nav-btn">Solicitar reparo</a>
+        <a href="#cl-sec-cronograma" class="pmoc-nav-btn">Cronograma</a>
+        <a href="#cl-sec-reparos" class="pmoc-nav-btn">Meus reparos</a>
+        <a href="#cl-sec-relatorios" class="pmoc-nav-btn">Relatorios</a>
+        <a href="#cl-sec-financeiro" class="pmoc-nav-btn">P&L</a>
+    </div>
+
     <div class="pmoc-cl-kpi">
         <div><div>Pendente</div><div class="n"><?= (int) ($resumo_os['pendente'] ?? 0) ?></div></div>
         <div><div>Agendado</div><div class="n"><?= (int) ($resumo_os['agendado'] ?? 0) ?></div></div>
@@ -147,7 +223,7 @@ foreach (($reparos ?? []) as $rep) {
         <div><div>Atrasado</div><div class="n"><?= (int) ($resumo_os['atrasado'] ?? 0) ?></div></div>
     </div>
 
-    <div class="pmoc-cl-box">
+    <div class="pmoc-cl-box pmoc-section" id="cl-sec-solicitar">
         <h4>Solicitar reparo</h4>
         <div class="body">
             <form action="<?= base_url('index.php/mine/solicitarReparoPmoc') ?>" method="post" class="pmoc-form">
@@ -170,11 +246,14 @@ foreach (($reparos ?? []) as $rep) {
         </div>
     </div>
 
-    <div class="pmoc-cl-box">
+    <div class="pmoc-cl-box pmoc-section" id="cl-sec-cronograma">
         <h4>Cronograma</h4>
         <div class="body">
+            <div class="pmoc-search">
+                <input type="text" placeholder="Buscar por data ou status..." data-table-search="#cl-tb-cronograma">
+            </div>
             <div class="pmoc-table-wrap">
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped pmoc-table-hover" id="cl-tb-cronograma">
                     <thead><tr><th>Data prevista</th><th>Status</th><th>Execucao</th></tr></thead>
                     <tbody>
                         <?php foreach ($cronograma as $item): ?>
@@ -201,7 +280,7 @@ foreach (($reparos ?? []) as $rep) {
         </div>
     </div>
 
-    <div class="pmoc-cl-box">
+    <div class="pmoc-cl-box pmoc-section" id="cl-sec-reparos">
         <h4>Minhas solicitacoes de reparo</h4>
         <div class="body">
             <div class="pmoc-reparo-resumo">
@@ -209,8 +288,17 @@ foreach (($reparos ?? []) as $rep) {
                 <span class="pmoc-cl-tag pmoc-cl-tag-neutral">Em andamento: <?= (int) $reparosResumo['em_andamento'] ?></span>
                 <span class="pmoc-cl-tag pmoc-cl-tag-success">Concluidos: <?= (int) $reparosResumo['concluido'] ?></span>
             </div>
+            <div class="pmoc-status-pills" data-status-filter="#cl-tb-reparos">
+                <button type="button" class="pmoc-status-pill active" data-status="">Todos</button>
+                <button type="button" class="pmoc-status-pill" data-status="aberto">Aberto</button>
+                <button type="button" class="pmoc-status-pill" data-status="em_andamento">Em andamento</button>
+                <button type="button" class="pmoc-status-pill" data-status="concluido">Concluido</button>
+            </div>
+            <div class="pmoc-search">
+                <input type="text" placeholder="Buscar por titulo, unidade ou equipamento..." data-table-search="#cl-tb-reparos">
+            </div>
             <div class="pmoc-table-wrap">
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped pmoc-table-hover" id="cl-tb-reparos">
                     <thead><tr><th>Data</th><th>Titulo</th><th>Unidade</th><th>Equipamento</th><th>Status</th></tr></thead>
                     <tbody>
                         <?php if (empty($reparos)): ?>
@@ -228,7 +316,7 @@ foreach (($reparos ?? []) as $rep) {
                                         $repClass = 'pmoc-cl-tag-danger';
                                     }
                                 ?>
-                                <tr>
+                                <tr data-status="<?= htmlspecialchars((string) $repStatus) ?>">
                                     <td><?= !empty($rep->data_solicitacao) ? date('d/m/Y H:i', strtotime($rep->data_solicitacao)) : '-' ?></td>
                                     <td><?= htmlspecialchars((string) ($rep->titulo ?: '-')) ?></td>
                                     <td><?= htmlspecialchars((string) ($rep->unidade_nome ?: '-')) ?></td>
@@ -243,11 +331,14 @@ foreach (($reparos ?? []) as $rep) {
         </div>
     </div>
 
-    <div class="pmoc-cl-box">
+    <div class="pmoc-cl-box pmoc-section" id="cl-sec-relatorios">
         <h4>Relatorios</h4>
         <div class="body">
+            <div class="pmoc-search">
+                <input type="text" placeholder="Buscar por tecnico, servico ou equipamento..." data-table-search="#cl-tb-relatorios">
+            </div>
             <div class="pmoc-table-wrap">
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped pmoc-table-hover" id="cl-tb-relatorios">
                     <thead><tr><th>Data</th><th>Unidade</th><th>Equipamento</th><th>Tecnico</th><th>Servico</th></tr></thead>
                     <tbody>
                         <?php if (empty($relatorios)): ?>
@@ -269,7 +360,7 @@ foreach (($reparos ?? []) as $rep) {
         </div>
     </div>
 
-    <div class="pmoc-cl-box">
+    <div class="pmoc-cl-box pmoc-section" id="cl-sec-financeiro">
         <h4>Painel financeiro (P&L)</h4>
         <div class="body">
             <form method="get" class="pmoc-form" style="margin-bottom:8px;">
@@ -314,3 +405,82 @@ foreach (($reparos ?? []) as $rep) {
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    function norm(v) {
+        return (v || '').toString().toLowerCase();
+    }
+
+    document.querySelectorAll('.pmoc-cl .pmoc-nav-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            var id = btn.getAttribute('href');
+            if (!id || id.charAt(0) !== '#') return;
+            var target = document.querySelector(id);
+            if (!target) return;
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    document.querySelectorAll('.pmoc-cl .pmoc-section').forEach(function (section) {
+        var head = section.querySelector('h4');
+        var body = section.querySelector('.body');
+        if (!head || !body) return;
+        if (head.querySelector('.pmoc-toggle-btn')) return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pmoc-toggle-btn';
+        btn.style.marginLeft = '8px';
+        btn.textContent = 'Ocultar';
+        btn.addEventListener('click', function () {
+            var hidden = body.style.display === 'none';
+            body.style.display = hidden ? '' : 'none';
+            btn.textContent = hidden ? 'Ocultar' : 'Expandir';
+        });
+        head.appendChild(btn);
+    });
+
+    document.querySelectorAll('.pmoc-cl [data-table-search]').forEach(function (input) {
+        var table = document.querySelector(input.getAttribute('data-table-search'));
+        if (!table) return;
+        var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
+        input.addEventListener('input', function () {
+            var q = norm(input.value);
+            rows.forEach(function (tr) {
+                var visible = norm(tr.textContent).indexOf(q) > -1;
+                tr.style.display = visible ? '' : 'none';
+            });
+        });
+    });
+
+    document.querySelectorAll('.pmoc-cl [data-status-filter]').forEach(function (wrap) {
+        var table = document.querySelector(wrap.getAttribute('data-status-filter'));
+        if (!table) return;
+        var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr[data-status]'));
+        wrap.querySelectorAll('.pmoc-status-pill').forEach(function (pill) {
+            pill.addEventListener('click', function () {
+                wrap.querySelectorAll('.pmoc-status-pill').forEach(function (p) { p.classList.remove('active'); });
+                pill.classList.add('active');
+                var wanted = norm(pill.getAttribute('data-status'));
+                rows.forEach(function (tr) {
+                    var status = norm(tr.getAttribute('data-status'));
+                    tr.style.display = (!wanted || status === wanted) ? '' : 'none';
+                });
+            });
+        });
+    });
+
+    document.querySelectorAll('.pmoc-cl .n').forEach(function (node) {
+        var raw = parseInt((node.textContent || '0').replace(/\D/g, ''), 10);
+        if (!isFinite(raw) || raw <= 0) return;
+        var i = 0;
+        var steps = 18;
+        var timer = setInterval(function () {
+            i++;
+            node.textContent = Math.round((raw * i) / steps);
+            if (i >= steps) clearInterval(timer);
+        }, 20);
+    });
+})();
+</script>

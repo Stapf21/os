@@ -199,6 +199,75 @@ $statusLabels = [
     margin: 0;
     min-width: 130px;
 }
+.pmoc-dash .pmoc-quick-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 14px;
+    padding: 10px;
+    border: 1px solid var(--pmoc-line);
+    border-radius: 10px;
+    background: #fff;
+}
+.pmoc-dash .pmoc-nav-btn {
+    border: 1px solid var(--pmoc-line);
+    background: var(--pmoc-bg-soft);
+    color: var(--pmoc-text);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 10px;
+    text-decoration: none;
+}
+.pmoc-dash .pmoc-nav-btn:hover {
+    text-decoration: none;
+    border-color: #a8b8cc;
+}
+.pmoc-dash .pmoc-section {
+    scroll-margin-top: 75px;
+}
+.pmoc-dash .pmoc-search {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.pmoc-dash .pmoc-search input {
+    margin: 0;
+    min-width: 260px;
+}
+.pmoc-dash .pmoc-toggle-btn {
+    border: 1px solid var(--pmoc-line);
+    background: #fff;
+    color: var(--pmoc-muted);
+    border-radius: 8px;
+    font-size: 12px;
+    padding: 4px 8px;
+}
+.pmoc-dash .pmoc-status-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 0 0 8px;
+}
+.pmoc-dash .pmoc-status-pill {
+    border: 1px solid var(--pmoc-line);
+    background: #fff;
+    color: var(--pmoc-text);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.pmoc-dash .pmoc-status-pill.active {
+    background: var(--pmoc-brand-soft);
+    border-color: #88c7de;
+    color: #0f6586;
+}
+.pmoc-dash .pmoc-table-hover tbody tr:hover {
+    background: #f6fbff;
+}
 @media (max-width: 1280px) {
     .pmoc-dash .pmoc-chip-row,
     .pmoc-dash .pmoc-kpi-grid {
@@ -257,7 +326,16 @@ $statusLabels = [
         </div>
     </div>
 
-    <div class="widget-box">
+    <div class="pmoc-quick-nav">
+        <a href="#sec-unidades" class="pmoc-nav-btn">Unidades</a>
+        <a href="#sec-cronograma" class="pmoc-nav-btn">Cronograma</a>
+        <a href="#sec-equipamentos" class="pmoc-nav-btn">Equipamentos</a>
+        <a href="#sec-relatorios" class="pmoc-nav-btn">Relatorios</a>
+        <a href="#sec-reparos" class="pmoc-nav-btn">Reparos</a>
+        <a href="#sec-financeiro" class="pmoc-nav-btn">P&L</a>
+    </div>
+
+    <div class="widget-box pmoc-section" id="sec-unidades">
         <div class="widget-content" style="padding: 14px;">
             <div class="pmoc-section-head" style="margin-bottom:10px;">
                 <h4 class="pmoc-section-title">Unidades do cliente</h4>
@@ -273,7 +351,7 @@ $statusLabels = [
                 <button class="btn btn-success">Adicionar unidade</button>
             </form>
             <div class="pmoc-table-wrap">
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped pmoc-table-hover">
                     <thead><tr><th>Nome</th><th>Empresa</th><th>Cidade</th><th>UF</th><th>Status</th></tr></thead>
                     <tbody>
                         <?php if (empty($unidades)): ?>
@@ -301,7 +379,7 @@ $statusLabels = [
         </div>
     </div>
 
-    <div class="widget-box">
+    <div class="widget-box pmoc-section" id="sec-cronograma">
         <div class="widget-content" style="padding: 14px;">
             <div class="pmoc-section-head" style="margin-bottom: 10px;">
                 <h4 class="pmoc-section-title">Cronograma de manutencao (12 ciclos)</h4>
@@ -309,8 +387,11 @@ $statusLabels = [
                     <a href="<?= base_url('pmoc/criar_os_pmoc/' . $plano->id_pmoc) ?>" class="btn btn-primary btn-small">Criar nova OS PMOC</a>
                 </div>
             </div>
+            <div class="pmoc-search">
+                <input type="text" placeholder="Buscar por data, status ou OS..." data-table-search="#tb-cronograma">
+            </div>
             <div class="pmoc-table-wrap">
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped pmoc-table-hover" id="tb-cronograma">
                     <thead><tr><th>Data prevista</th><th>Status</th><th>OS</th><th>Data conclusao</th><th>Acao</th></tr></thead>
                     <tbody>
                         <?php foreach ($cronograma as $item): ?>
@@ -358,7 +439,7 @@ $statusLabels = [
         </div>
     </div>
 
-    <div class="widget-box">
+    <div class="widget-box pmoc-section" id="sec-equipamentos">
         <div class="widget-content" style="padding: 14px;">
             <div class="pmoc-section-head" style="margin-bottom: 10px;">
                 <h4 class="pmoc-section-title">Equipamentos</h4>
@@ -381,9 +462,12 @@ $statusLabels = [
                 <button class="btn btn-small btn-primary">Filtrar</button>
                 <a href="<?= base_url('equipamentos/novo?cliente_id=' . $plano->clientes_id . '&unidade_id=' . (int) $unidadeId) ?>" class="btn btn-success btn-small">Adicionar equipamento</a>
             </form>
+            <div class="pmoc-search">
+                <input type="text" placeholder="Buscar equipamento, tipo, local..." data-table-search="#tb-equipamentos">
+            </div>
 
             <div class="pmoc-table-wrap">
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped pmoc-table-hover" id="tb-equipamentos">
                     <thead><tr><th>Unidade</th><th>Equipamento</th><th>Tipo</th><th>BTUs</th><th>Local</th><th>Acoes</th></tr></thead>
                     <tbody>
                         <?php if (empty($equipamentos)): ?>
@@ -409,14 +493,17 @@ $statusLabels = [
         </div>
     </div>
 
-    <div class="widget-box">
+    <div class="widget-box pmoc-section" id="sec-relatorios">
         <div class="widget-content" style="padding: 14px;">
             <div class="pmoc-section-head" style="margin-bottom:10px;">
                 <h4 class="pmoc-section-title">Relatorios de manutencao</h4>
                 <span class="pmoc-tag pmoc-tag-neutral">Total: <?= count($relatoriosPmoc ?? []) ?></span>
             </div>
+            <div class="pmoc-search">
+                <input type="text" placeholder="Buscar por tecnico, servico, equipamento..." data-table-search="#tb-relatorios">
+            </div>
             <div class="pmoc-table-wrap">
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped pmoc-table-hover" id="tb-relatorios">
                     <thead><tr><th>Data</th><th>Unidade</th><th>Equipamento</th><th>Tecnico</th><th>Servico</th><th>OS</th></tr></thead>
                     <tbody>
                         <?php if (empty($relatoriosPmoc)): ?>
@@ -439,7 +526,7 @@ $statusLabels = [
         </div>
     </div>
 
-    <div class="widget-box">
+    <div class="widget-box pmoc-section" id="sec-reparos">
         <div class="widget-content" style="padding: 14px;">
             <div class="pmoc-section-head" style="margin-bottom:10px;">
                 <h4 class="pmoc-section-title">Solicitacoes de reparo</h4>
@@ -464,9 +551,18 @@ $statusLabels = [
                 <input type="text" name="descricao" class="pmoc-input-grow" placeholder="Descricao da solicitacao">
                 <button type="submit" class="btn btn-primary">Abrir solicitacao</button>
             </form>
+            <div class="pmoc-status-pills" data-status-filter="#tb-reparos">
+                <button type="button" class="pmoc-status-pill active" data-status="">Todos</button>
+                <button type="button" class="pmoc-status-pill" data-status="aberto">Aberto</button>
+                <button type="button" class="pmoc-status-pill" data-status="em_andamento">Em andamento</button>
+                <button type="button" class="pmoc-status-pill" data-status="concluido">Concluido</button>
+            </div>
+            <div class="pmoc-search">
+                <input type="text" placeholder="Buscar reparo por titulo, unidade ou equipamento..." data-table-search="#tb-reparos">
+            </div>
 
             <div class="pmoc-table-wrap">
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped pmoc-table-hover" id="tb-reparos">
                     <thead><tr><th>Data</th><th>Titulo</th><th>Unidade</th><th>Equipamento</th><th>Origem</th><th>Status</th><th>Acoes</th></tr></thead>
                     <tbody>
                         <?php if (empty($reparos)): ?>
@@ -487,7 +583,7 @@ $statusLabels = [
                                     }
                                     $reparoId = (int) ($rep->id ?? $rep->idReparo ?? $rep->id_pmoc_reparo ?? $rep->idPmocReparo ?? 0);
                                 ?>
-                                <tr>
+                                <tr data-status="<?= htmlspecialchars((string) $repStatus) ?>">
                                     <td><?= date('d/m/Y H:i', strtotime($rep->data_solicitacao)) ?></td>
                                     <td><?= htmlspecialchars((string) $rep->titulo) ?></td>
                                     <td><?= htmlspecialchars((string) ($rep->unidade_nome ?: '-')) ?></td>
@@ -518,7 +614,7 @@ $statusLabels = [
         </div>
     </div>
 
-    <div class="widget-box">
+    <div class="widget-box pmoc-section" id="sec-financeiro">
         <div class="widget-content" style="padding: 14px;">
             <div class="pmoc-section-head" style="margin-bottom:10px;">
                 <h4 class="pmoc-section-title">Painel financeiro do contrato (P&L)</h4>
@@ -581,3 +677,83 @@ $statusLabels = [
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    function norm(v) {
+        return (v || '').toString().toLowerCase();
+    }
+
+    document.querySelectorAll('.pmoc-nav-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            var id = btn.getAttribute('href');
+            if (!id || id.charAt(0) !== '#') return;
+            var target = document.querySelector(id);
+            if (!target) return;
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    document.querySelectorAll('.pmoc-section').forEach(function (section) {
+        var head = section.querySelector('.pmoc-section-head');
+        var body = section.querySelector('.pmoc-table-wrap') || section.querySelector('.widget-content');
+        if (!head || !body) return;
+        if (head.querySelector('.pmoc-toggle-btn')) return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pmoc-toggle-btn';
+        btn.textContent = 'Ocultar';
+        btn.addEventListener('click', function () {
+            var hidden = body.style.display === 'none';
+            body.style.display = hidden ? '' : 'none';
+            btn.textContent = hidden ? 'Ocultar' : 'Expandir';
+        });
+        head.appendChild(btn);
+    });
+
+    document.querySelectorAll('[data-table-search]').forEach(function (input) {
+        var table = document.querySelector(input.getAttribute('data-table-search'));
+        if (!table) return;
+        var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
+        input.addEventListener('input', function () {
+            var q = norm(input.value);
+            rows.forEach(function (tr) {
+                var visible = norm(tr.textContent).indexOf(q) > -1;
+                tr.style.display = visible ? '' : 'none';
+            });
+        });
+    });
+
+    document.querySelectorAll('[data-status-filter]').forEach(function (wrap) {
+        var table = document.querySelector(wrap.getAttribute('data-status-filter'));
+        if (!table) return;
+        var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr[data-status]'));
+        wrap.querySelectorAll('.pmoc-status-pill').forEach(function (pill) {
+            pill.addEventListener('click', function () {
+                wrap.querySelectorAll('.pmoc-status-pill').forEach(function (p) { p.classList.remove('active'); });
+                pill.classList.add('active');
+                var wanted = norm(pill.getAttribute('data-status'));
+                rows.forEach(function (tr) {
+                    var status = norm(tr.getAttribute('data-status'));
+                    var visible = !wanted || status === wanted;
+                    tr.style.display = visible ? '' : 'none';
+                });
+            });
+        });
+    });
+
+    document.querySelectorAll('.pmoc-kpi-value').forEach(function (node) {
+        var raw = parseInt((node.textContent || '0').replace(/\D/g, ''), 10);
+        if (!isFinite(raw) || raw <= 0) return;
+        var start = 0;
+        var steps = 18;
+        var cur = 0;
+        var timer = setInterval(function () {
+            cur++;
+            node.textContent = Math.round((raw * cur) / steps);
+            if (cur >= steps) clearInterval(timer);
+        }, 20);
+    });
+})();
+</script>

@@ -15,6 +15,18 @@ if ($statusContrato === 'ativo') {
 } elseif ($statusContrato === 'inativo') {
     $statusContratoClass = 'pmoc-cl-tag-danger';
 }
+
+$reparosResumo = [
+    'aberto' => 0,
+    'em_andamento' => 0,
+    'concluido' => 0,
+];
+foreach (($reparos ?? []) as $rep) {
+    $rs = mb_strtolower((string) ($rep->status ?? ''));
+    if (isset($reparosResumo[$rs])) {
+        $reparosResumo[$rs]++;
+    }
+}
 ?>
 
 <style>
@@ -100,6 +112,7 @@ if ($statusContrato === 'ativo') {
 .pmoc-cl .pmoc-form { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:0 0 10px; }
 .pmoc-cl .pmoc-form input, .pmoc-cl .pmoc-form select { margin:0; }
 .pmoc-cl .pmoc-table-wrap { overflow-x:auto; }
+.pmoc-cl .pmoc-reparo-resumo { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
 @media (max-width: 920px) {
     .pmoc-cl .pmoc-cl-info,
     .pmoc-cl .pmoc-cl-kpi {
@@ -182,6 +195,48 @@ if ($statusContrato === 'ativo') {
                                 <td><?= $item->data_execucao ? date('d/m/Y', strtotime($item->data_execucao)) : '-' ?></td>
                             </tr>
                         <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="pmoc-cl-box">
+        <h4>Minhas solicitacoes de reparo</h4>
+        <div class="body">
+            <div class="pmoc-reparo-resumo">
+                <span class="pmoc-cl-tag pmoc-cl-tag-warning">Abertos: <?= (int) $reparosResumo['aberto'] ?></span>
+                <span class="pmoc-cl-tag pmoc-cl-tag-neutral">Em andamento: <?= (int) $reparosResumo['em_andamento'] ?></span>
+                <span class="pmoc-cl-tag pmoc-cl-tag-success">Concluidos: <?= (int) $reparosResumo['concluido'] ?></span>
+            </div>
+            <div class="pmoc-table-wrap">
+                <table class="table table-bordered table-striped">
+                    <thead><tr><th>Data</th><th>Titulo</th><th>Unidade</th><th>Equipamento</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <?php if (empty($reparos)): ?>
+                            <tr><td colspan="5">Nenhuma solicitacao registrada.</td></tr>
+                        <?php else: ?>
+                            <?php foreach ($reparos as $rep): ?>
+                                <?php
+                                    $repStatus = mb_strtolower((string) ($rep->status ?: ''));
+                                    $repClass = 'pmoc-cl-tag-neutral';
+                                    if ($repStatus === 'aberto') {
+                                        $repClass = 'pmoc-cl-tag-warning';
+                                    } elseif ($repStatus === 'concluido') {
+                                        $repClass = 'pmoc-cl-tag-success';
+                                    } elseif ($repStatus === 'cancelado') {
+                                        $repClass = 'pmoc-cl-tag-danger';
+                                    }
+                                ?>
+                                <tr>
+                                    <td><?= !empty($rep->data_solicitacao) ? date('d/m/Y H:i', strtotime($rep->data_solicitacao)) : '-' ?></td>
+                                    <td><?= htmlspecialchars((string) ($rep->titulo ?: '-')) ?></td>
+                                    <td><?= htmlspecialchars((string) ($rep->unidade_nome ?: '-')) ?></td>
+                                    <td><?= htmlspecialchars((string) ($rep->equipamento_descricao ?: '-')) ?></td>
+                                    <td><span class="pmoc-cl-tag <?= $repClass ?>"><?= ucfirst(str_replace('_', ' ', (string) ($rep->status ?: '-'))) ?></span></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>

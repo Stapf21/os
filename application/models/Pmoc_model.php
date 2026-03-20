@@ -209,6 +209,46 @@ class Pmoc_model extends CI_Model
         return $this->db->insert_id();
     }
 
+    public function getReparoById($reparoId)
+    {
+        if (! $this->db->table_exists('pmoc_reparos')) {
+            return null;
+        }
+
+        $pk = $this->getPkReparo();
+        return $this->db->where($pk, (int) $reparoId)->get('pmoc_reparos')->row();
+    }
+
+    public function updateReparoStatus($reparoId, $status)
+    {
+        if (! $this->db->table_exists('pmoc_reparos')) {
+            return false;
+        }
+
+        $status = mb_strtolower(trim((string) $status));
+        if (! in_array($status, ['aberto', 'em_andamento', 'concluido'], true)) {
+            return false;
+        }
+
+        $data = [
+            'status' => $status,
+            'data_atualizacao' => date('Y-m-d H:i:s'),
+        ];
+
+        $this->db->where($this->getPkReparo(), (int) $reparoId);
+        return $this->db->update('pmoc_reparos', $data);
+    }
+
+    private function getPkReparo()
+    {
+        foreach (['id', 'idReparo', 'id_pmoc_reparo', 'idPmocReparo'] as $campo) {
+            if ($this->db->field_exists($campo, 'pmoc_reparos')) {
+                return $campo;
+            }
+        }
+        return 'id';
+    }
+
     public function getReparos($planoId, $status = null)
     {
         if (! $this->db->table_exists('pmoc_reparos')) {

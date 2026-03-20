@@ -399,6 +399,42 @@ class Pmoc extends MY_Controller
         redirect($redirect);
     }
 
+    public function atualizar_status_reparo($plano_id, $reparo_id)
+    {
+        $plano = $this->pmoc_model->getById((int) $plano_id);
+        if (! $plano) {
+            show_404();
+        }
+
+        $reparo = $this->pmoc_model->getReparoById((int) $reparo_id);
+        if (! $reparo || (int) $reparo->plano_id !== (int) $plano->id_pmoc) {
+            $this->session->set_flashdata('error', 'Solicitacao de reparo nao encontrada para este contrato.');
+            redirect('pmoc/plano/' . (int) $plano->id_pmoc);
+            return;
+        }
+
+        $novoStatus = mb_strtolower(trim((string) $this->input->post('status')));
+        if (! in_array($novoStatus, ['aberto', 'em_andamento', 'concluido'], true)) {
+            $this->session->set_flashdata('error', 'Status de reparo invalido.');
+            redirect('pmoc/plano/' . (int) $plano->id_pmoc);
+            return;
+        }
+
+        if ($this->pmoc_model->updateReparoStatus((int) $reparo_id, $novoStatus)) {
+            $labels = [
+                'aberto' => 'Aberto',
+                'em_andamento' => 'Em andamento',
+                'concluido' => 'Concluido',
+            ];
+            $this->session->set_flashdata('success', 'Status do reparo atualizado para ' . $labels[$novoStatus] . '.');
+        } else {
+            $this->session->set_flashdata('error', 'Nao foi possivel atualizar o status do reparo.');
+        }
+
+        $redirect = $this->input->post('redirect') ?: 'pmoc/plano/' . (int) $plano->id_pmoc;
+        redirect($redirect);
+    }
+
     private function resolverPeriodo($tipoPeriodo, $periodoReferencia, $dataInicioCustom, $dataFimCustom)
     {
         if ($tipoPeriodo === 'anual') {

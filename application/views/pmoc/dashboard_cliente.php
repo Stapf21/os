@@ -21,7 +21,7 @@ if ($statusContrato === 'ativo') {
 
 $totalReparosAbertos = 0;
 foreach (($reparos ?? []) as $rep) {
-    if (mb_strtolower((string) ($rep->status ?? '')) === 'aberto') {
+    if (in_array(mb_strtolower((string) ($rep->status ?? '')), ['aberto', 'em_andamento'], true)) {
         $totalReparosAbertos++;
     }
 }
@@ -188,6 +188,16 @@ $statusLabels = [
 }
 .pmoc-dash .pmoc-empty {
     color: var(--pmoc-muted);
+}
+.pmoc-dash .pmoc-status-form {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin: 0;
+}
+.pmoc-dash .pmoc-status-form select {
+    margin: 0;
+    min-width: 130px;
 }
 @media (max-width: 1280px) {
     .pmoc-dash .pmoc-chip-row,
@@ -457,10 +467,10 @@ $statusLabels = [
 
             <div class="pmoc-table-wrap">
                 <table class="table table-bordered table-striped">
-                    <thead><tr><th>Data</th><th>Titulo</th><th>Unidade</th><th>Equipamento</th><th>Origem</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Data</th><th>Titulo</th><th>Unidade</th><th>Equipamento</th><th>Origem</th><th>Status</th><th>Acoes</th></tr></thead>
                     <tbody>
                         <?php if (empty($reparos)): ?>
-                            <tr><td colspan="6" class="pmoc-empty">Sem solicitacoes registradas.</td></tr>
+                            <tr><td colspan="7" class="pmoc-empty">Sem solicitacoes registradas.</td></tr>
                         <?php else: ?>
                             <?php foreach ($reparos as $rep): ?>
                                 <?php
@@ -468,11 +478,14 @@ $statusLabels = [
                                     $repClass = 'pmoc-tag-neutral';
                                     if ($repStatus === 'aberto') {
                                         $repClass = 'pmoc-tag-warning';
+                                    } elseif ($repStatus === 'em_andamento') {
+                                        $repClass = 'pmoc-tag-warning';
                                     } elseif ($repStatus === 'concluido') {
                                         $repClass = 'pmoc-tag-success';
                                     } elseif ($repStatus === 'cancelado') {
                                         $repClass = 'pmoc-tag-danger';
                                     }
+                                    $reparoId = (int) ($rep->id ?? $rep->idReparo ?? $rep->id_pmoc_reparo ?? $rep->idPmocReparo ?? 0);
                                 ?>
                                 <tr>
                                     <td><?= date('d/m/Y H:i', strtotime($rep->data_solicitacao)) ?></td>
@@ -480,7 +493,22 @@ $statusLabels = [
                                     <td><?= htmlspecialchars((string) ($rep->unidade_nome ?: '-')) ?></td>
                                     <td><?= htmlspecialchars((string) ($rep->equipamento_descricao ?: '-')) ?></td>
                                     <td><?= ucfirst((string) $rep->origem) ?></td>
-                                    <td><span class="pmoc-tag <?= $repClass ?>"><?= ucfirst((string) ($rep->status ?: '-')) ?></span></td>
+                                    <td><span class="pmoc-tag <?= $repClass ?>"><?= ucfirst(str_replace('_', ' ', (string) ($rep->status ?: '-'))) ?></span></td>
+                                    <td>
+                                        <?php if ($reparoId > 0): ?>
+                                            <form action="<?= base_url('pmoc/atualizar_status_reparo/' . $plano->id_pmoc . '/' . $reparoId) ?>" method="post" class="pmoc-status-form">
+                                                <input type="hidden" name="redirect" value="<?= current_url() ?>">
+                                                <select name="status">
+                                                    <option value="aberto" <?= $repStatus === 'aberto' ? 'selected' : '' ?>>Aberto</option>
+                                                    <option value="em_andamento" <?= $repStatus === 'em_andamento' ? 'selected' : '' ?>>Em andamento</option>
+                                                    <option value="concluido" <?= $repStatus === 'concluido' ? 'selected' : '' ?>>Concluido</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-small">Atualizar</button>
+                                            </form>
+                                        <?php else: ?>
+                                            <span class="pmoc-empty">-</span>
+                                        <?php endif; ?>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>

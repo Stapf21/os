@@ -4,12 +4,49 @@
 <script type="text/javascript" src="<?php echo base_url() ?>assets/js/jquery-ui/js/jquery-ui-1.9.2.custom.js"></script>
 <script type="text/javascript" src="<?php echo base_url() ?>assets/js/jquery.validate.js"></script>
 
+<style>
+#formPmoc.pmoc-form .control-group {
+    margin-bottom: 12px;
+}
+#formPmoc.pmoc-form .control-label {
+    float: none;
+    width: auto;
+    text-align: left;
+    margin: 0 0 4px;
+    padding-top: 0;
+    font-weight: 600;
+}
+#formPmoc.pmoc-form .controls {
+    margin-left: 0;
+}
+#formPmoc.pmoc-form .controls input,
+#formPmoc.pmoc-form .controls select {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 0;
+    height: 34px;
+}
+#formPmoc.pmoc-form .row-fluid [class*="span"] {
+    margin-bottom: 4px;
+}
+#formPmoc.pmoc-form .form-actions {
+    margin-top: 10px;
+}
+@media (max-width: 991px) {
+    #formPmoc.pmoc-form .row-fluid [class*="span"] {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+}
+</style>
+
 <div class="row-fluid" style="margin-top:0">
     <div class="span12">
         <div class="widget-box">
             <div class="widget-title"><h5><?php echo isset($plano) ? 'Editar PMOC e Plano Mensal' : 'Novo PMOC e Plano Mensal'; ?></h5></div>
             <div class="widget-content nopadding tab-content" style="padding:10px 0;">
-                <form action="<?php echo base_url() ?>pmoc/salvar" method="post" id="formPmoc" class="form-horizontal">
+                <form action="<?php echo base_url() ?>pmoc/salvar" method="post" id="formPmoc" class="form-horizontal pmoc-form">
                     <?php if (isset($plano)) { ?>
                         <input type="hidden" name="id" value="<?php echo (int) $plano->id_pmoc; ?>">
                     <?php } ?>

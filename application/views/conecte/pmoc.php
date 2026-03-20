@@ -79,9 +79,16 @@
             $lucro = $receita - $custo;
             $margem = $receita > 0 ? ($lucro / $receita) * 100 : 0;
         ?>
-        <form method="get" style="margin-bottom:8px;">
-            <label>Periodo (YYYY-MM ou YYYY)</label>
-            <input type="text" name="periodo" value="<?= htmlspecialchars((string) $periodo) ?>">
+        <form method="get" style="margin-bottom:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <select name="tipo_periodo" style="width:140px;">
+                <option value="mensal" <?= $tipoPeriodo === 'mensal' ? 'selected' : '' ?>>Mensal</option>
+                <option value="trimestral" <?= $tipoPeriodo === 'trimestral' ? 'selected' : '' ?>>Trimestral</option>
+                <option value="anual" <?= $tipoPeriodo === 'anual' ? 'selected' : '' ?>>Anual</option>
+                <option value="personalizado" <?= $tipoPeriodo === 'personalizado' ? 'selected' : '' ?>>Personalizado</option>
+            </select>
+            <input type="text" name="periodo_referencia" value="<?= htmlspecialchars((string) $periodoReferencia) ?>" placeholder="YYYY-MM / YYYY / YYYY-QX">
+            <input type="date" name="data_inicio" value="<?= htmlspecialchars((string) $dataInicio) ?>">
+            <input type="date" name="data_fim" value="<?= htmlspecialchars((string) $dataFim) ?>">
             <button class="btn btn-small">Filtrar</button>
         </form>
         <div style="display:flex; gap:16px; flex-wrap:wrap;">
@@ -90,5 +97,24 @@
             <span><b>Lucro:</b> R$ <?= number_format($lucro, 2, ',', '.') ?></span>
             <span><b>Margem:</b> <?= number_format($margem, 2, ',', '.') ?>%</span>
         </div>
+
+        <?php if (!empty($resumoUnidadesPnl)): ?>
+            <hr>
+            <h5>Detalhado por unidade</h5>
+            <table class="table table-bordered">
+                <thead><tr><th>Unidade</th><th>Receita</th><th>Custos</th><th>Lucro</th></tr></thead>
+                <tbody>
+                <?php foreach ($resumoUnidadesPnl as $ru): ?>
+                    <?php $lucroUn = ((float) $ru->receitas) - ((float) $ru->custos_financeiros + (float) $ru->custos_diretos); ?>
+                    <tr>
+                        <td><?= htmlspecialchars((string) $ru->nome) ?></td>
+                        <td>R$ <?= number_format((float) $ru->receitas, 2, ',', '.') ?></td>
+                        <td>R$ <?= number_format((float) $ru->custos_financeiros + (float) $ru->custos_diretos, 2, ',', '.') ?></td>
+                        <td>R$ <?= number_format($lucroUn, 2, ',', '.') ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
     </div>
 </div>

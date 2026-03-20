@@ -207,11 +207,184 @@ class Pmoc extends MY_Controller
         redirect('pmoc/plano/' . $plano_id);
     }
 
+    public function nova_os_pmoc($plano_id)
+    {
+        $plano = $this->pmoc_model->getById((int) $plano_id);
+        if (! $plano) {
+            show_404();
+        }
+
+        $unidadeId = (int) $this->input->get('unidade_id');
+        $dataPrevista = $this->input->get('data_prevista');
+        if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $dataPrevista)) {
+            $dataPrevista = date('Y-m-d');
+        }
+
+        $this->data['modo'] = 'criar';
+        $this->data['plano'] = $plano;
+        $this->data['os_pmoc'] = (object) [
+            'status' => 'agendado',
+            'descricao' => 'Execucao de manutencao preventiva conforme contrato PMOC.',
+            'tipo_atendimento' => (string) ($plano->tipo_atendimento_padrao ?: ''),
+            'data_prevista' => $dataPrevista,
+            'dataInicial' => date('Y-m-d H:i:s'),
+            'dataFinal' => null,
+            'cliente_unidade_id' => $unidadeId > 0 ? $unidadeId : null,
+        ];
+        $this->data['unidades'] = $this->pmoc_model->getUnidades($plano->clientes_id);
+        $this->data['view'] = 'pmoc/form_os_pmoc';
+        return $this->layout();
+    }
+
+    public function salvar_os_pmoc($plano_id)
+    {
+        if (mb_strtolower((string) $this->input->method()) !== 'post') {
+            redirect('pmoc/nova_os_pmoc/' . (int) $plano_id);
+            return;
+        }
+
+        $plano = $this->pmoc_model->getById((int) $plano_id);
+        if (! $plano) {
+            show_404();
+        }
+
+        $clienteUnidadeId = (int) $this->input->post('cliente_unidade_id');
+        $clienteUnidadeId = $clienteUnidadeId > 0 ? $clienteUnidadeId : null;
+        $status = $this->normalizarStatusOsPmoc($this->input->post('status'));
+        $dataPrevista = $this->input->post('data_prevista');
+        if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $dataPrevista)) {
+            $dataPrevista = date('Y-m-d');
+        }
+
+        if ($this->existeOsDuplicada((int) $plano->id_pmoc, $dataPrevista, $clienteUnidadeId)) {
+            $this->session->set_flashdata('error', 'Ja existe uma OS PMOC pendente/agendada para essa data e unidade.');
+            redirect('pmoc/nova_os_pmoc/' . (int) $plano->id_pmoc . '?data_prevista=' . $dataPrevista . '&unidade_id=' . (int) $clienteUnidadeId);
+            return;
+        }
+
+        $dataInicial = $this->input->post('data_inicial');
+        if (! preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', (string) $dataInicial)) {
+            $dataInicial = date('Y-m-d\TH:i');
+        }
+
+        $osData = [
+            'plano_id' => (int) $plano->id_pmoc,
+            'clientes_id' => (int) $plano->clientes_id,
+            'cliente_unidade_id' => $clienteUnidadeId,
+            'usuarios_id' => (int) $this->session->userdata('id_admin'),
+            'status' => $status,
+            'descricao' => trim((string) $this->input->post('descricao')),
+            'tipo_atendimento' => trim((string) $this->input->post('tipo_atendimento')),
+            'data_prevista' => $dataPrevista,
+            'dataInicial' => date('Y-m-d H:i:s', strtotime($dataInicial)),
+            'created_at' => date('Y-m-d H:i:s'),
+        ];
+
+        if ($status === 'concluido') {
+            $osData['dataFinal'] = date('Y-m-d H:i:s');
+        }
+
+        $idOsPmoc = $this->OsPmoc_model->add($osData);
+        if (! $idOsPmoc) {
+            $this->session->set_flashdata('error', 'Erro ao criar OS PMOC.');
+            redirect('pmoc/nova_os_pmoc/' . (int) $plano->id_pmoc);
+            return;
+        }
+
+        $equipamentos = $this->equipamentos_model->getByClienteId((int) $plano->clientes_id, $clienteUnidadeId);
+        foreach ($equipamentos as $eq) {
+            $this->OsPmoc_model->vincularEquipamento((int) $idOsPmoc, (int) $eq->idEquipamentos);
+        }
+
+        $this->session->set_flashdata('success', 'OS PMOC criada com sucesso.');
+        redirect('pmoc/os_pmoc/' . (int) $idOsPmoc);
+    }
+
+    public function editar_os_pmoc($id)
+    {
+        $os = $this->OsPmoc_model->getById((int) $id);
+        if (! $os) {
+            show_404();
+        }
+
+        $plano = $this->pmoc_model->getById((int) $os->plano_id);
+        if (! $plano) {
+            show_404();
+        }
+
+        $this->data['modo'] = 'editar';
+        $this->data['plano'] = $plano;
+        $this->data['os_pmoc'] = $os;
+        $this->data['unidades'] = $this->pmoc_model->getUnidades((int) $plano->clientes_id);
+        $this->data['view'] = 'pmoc/form_os_pmoc';
+        return $this->layout();
+    }
+
+    public function atualizar_os_pmoc($id)
+    {
+        if (mb_strtolower((string) $this->input->method()) !== 'post') {
+            redirect('pmoc/editar_os_pmoc/' . (int) $id);
+            return;
+        }
+
+        $os = $this->OsPmoc_model->getById((int) $id);
+        if (! $os) {
+            show_404();
+        }
+
+        $plano = $this->pmoc_model->getById((int) $os->plano_id);
+        if (! $plano) {
+            show_404();
+        }
+
+        $clienteUnidadeId = (int) $this->input->post('cliente_unidade_id');
+        $clienteUnidadeId = $clienteUnidadeId > 0 ? $clienteUnidadeId : null;
+        $status = $this->normalizarStatusOsPmoc($this->input->post('status'));
+        $dataPrevista = $this->input->post('data_prevista');
+        if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $dataPrevista)) {
+            $dataPrevista = date('Y-m-d');
+        }
+
+        $duplicada = $this->existeOsDuplicada((int) $plano->id_pmoc, $dataPrevista, $clienteUnidadeId, (int) $os->idOsPmoc);
+        if ($duplicada) {
+            $this->session->set_flashdata('error', 'Ja existe outra OS PMOC pendente/agendada para essa data e unidade.');
+            redirect('pmoc/editar_os_pmoc/' . (int) $os->idOsPmoc);
+            return;
+        }
+
+        $dataInicial = $this->input->post('data_inicial');
+        if (! preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', (string) $dataInicial)) {
+            $dataInicial = date('Y-m-d\TH:i', strtotime((string) $os->dataInicial));
+        }
+
+        $update = [
+            'cliente_unidade_id' => $clienteUnidadeId,
+            'status' => $status,
+            'descricao' => trim((string) $this->input->post('descricao')),
+            'tipo_atendimento' => trim((string) $this->input->post('tipo_atendimento')),
+            'data_prevista' => $dataPrevista,
+            'dataInicial' => date('Y-m-d H:i:s', strtotime($dataInicial)),
+        ];
+
+        if ($status === 'concluido' && empty($os->dataFinal)) {
+            $update['dataFinal'] = date('Y-m-d H:i:s');
+        } elseif ($status !== 'concluido') {
+            $update['dataFinal'] = null;
+        }
+
+        if ($this->OsPmoc_model->update((int) $os->idOsPmoc, $update)) {
+            $this->session->set_flashdata('success', 'OS PMOC atualizada com sucesso.');
+        } else {
+            $this->session->set_flashdata('error', 'Nao foi possivel atualizar a OS PMOC.');
+        }
+
+        redirect('pmoc/os_pmoc/' . (int) $os->idOsPmoc);
+    }
+
     public function criar_os_pmoc($plano_id)
     {
         if (mb_strtolower((string) $this->input->method()) !== 'post') {
-            $this->session->set_flashdata('error', 'Acao invalida para criacao de OS PMOC.');
-            redirect('pmoc/plano/' . (int) $plano_id);
+            redirect('pmoc/nova_os_pmoc/' . (int) $plano_id);
             return;
         }
 
@@ -222,23 +395,9 @@ class Pmoc extends MY_Controller
 
         $dataPrevista = $this->input->post('data_prevista') ?: date('Y-m-d');
         $clienteUnidadeId = $this->input->post('cliente_unidade_id') ?: null;
-        $status = $this->input->post('status') ?: 'agendado';
-        $status = mb_strtolower(trim((string) $status));
-        if (! in_array($status, ['pendente', 'agendado', 'em andamento', 'em_execucao', 'concluido'], true)) {
-            $status = 'agendado';
-        }
+        $status = $this->normalizarStatusOsPmoc($this->input->post('status') ?: 'agendado');
 
-        $this->db->from('os_pmoc');
-        $this->db->where('plano_id', $plano_id);
-        $this->db->where('DATE(data_prevista) =', $dataPrevista);
-        if (! empty($clienteUnidadeId)) {
-            $this->db->where('cliente_unidade_id', $clienteUnidadeId);
-        } else {
-            $this->db->where('(cliente_unidade_id IS NULL OR cliente_unidade_id = 0)', null, false);
-        }
-        $this->db->where_in('status', ['pendente', 'agendado', 'em andamento', 'em_execucao']);
-        $duplicada = $this->db->count_all_results();
-        if ($duplicada > 0) {
+        if ($this->existeOsDuplicada((int) $plano_id, $dataPrevista, $clienteUnidadeId)) {
             $this->session->set_flashdata('error', 'Ja existe uma OS PMOC pendente/agendada para essa data e unidade.');
             redirect('pmoc/plano/' . $plano_id);
             return;
@@ -500,6 +659,35 @@ class Pmoc extends MY_Controller
 
         $redirect = $this->input->post('redirect') ?: 'pmoc/plano/' . (int) $plano->id_pmoc;
         redirect($redirect);
+    }
+
+    private function normalizarStatusOsPmoc($status)
+    {
+        $status = mb_strtolower(trim((string) $status));
+        if ($status === 'em execução' || $status === 'em execucao' || $status === 'em andamento') {
+            return 'em andamento';
+        }
+        if (in_array($status, ['pendente', 'agendado', 'concluido', 'atrasado'], true)) {
+            return $status;
+        }
+        return 'agendado';
+    }
+
+    private function existeOsDuplicada($planoId, $dataPrevista, $clienteUnidadeId = null, $ignorarOsId = null)
+    {
+        $this->db->from('os_pmoc');
+        $this->db->where('plano_id', (int) $planoId);
+        $this->db->where('DATE(data_prevista) =', $dataPrevista);
+        if (! empty($clienteUnidadeId)) {
+            $this->db->where('cliente_unidade_id', (int) $clienteUnidadeId);
+        } else {
+            $this->db->where('(cliente_unidade_id IS NULL OR cliente_unidade_id = 0)', null, false);
+        }
+        if (! empty($ignorarOsId)) {
+            $this->db->where('idOsPmoc !=', (int) $ignorarOsId);
+        }
+        $this->db->where_in('status', ['pendente', 'agendado', 'em andamento', 'em_execucao']);
+        return (int) $this->db->count_all_results() > 0;
     }
 
     private function resolverPeriodo($tipoPeriodo, $periodoReferencia, $dataInicioCustom, $dataFimCustom)

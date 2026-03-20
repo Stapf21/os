@@ -1,142 +1,200 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
-<div class="content-wrapper">
-    <section class="content-header">
-        <h1 style="font-size:2.2rem; font-weight:800; margin-bottom:8px;">
-            Detalhes da OS - <?php echo !empty($equipamentos) ? htmlspecialchars($equipamentos[0]->descricao) : 'Equipamento'; ?>
-        </h1>
-        <ol class="breadcrumb">
-            <li><a href="<?php echo base_url(); ?>"><i class="fa fa-dashboard"></i> Início</a></li>
-            <li><a href="<?php echo base_url(); ?>pmoc">Planos PMOC</a></li>
-            <li class="active">OS PMOC</li>
-        </ol>
-    </section>
-    <section class="content">
-        <div class="row">
-            <div class="col-xs-12">
-                <div class="box">
-                    <div class="box-header">
-                        <h3 class="box-title">Informações da OS PMOC</h3>
-                    </div>
-                    <div class="box-body">
-                        <div style="margin-bottom:18px;">
-                            <?php if (!empty($equipamentos)) {
-                                $eq = $equipamentos[0];
-                                echo '<div style="font-size:1.1rem; margin-bottom:8px;"><b>Equipamento:</b> ' . htmlspecialchars($eq->descricao) . ' <span style="color:#7b8ca6;">| Modelo: ' . htmlspecialchars($eq->modelo) . ' | Nº Série: ' . htmlspecialchars($eq->num_serie) . '</span></div>';
-                            } ?>
-                            <table class="table table-condensed" style="margin-bottom:0;">
-                                <tr>
-                                    <td><b>Status:</b> <span class="label label-<?php echo ($os_pmoc->status == 'concluido') ? 'success' : (($os_pmoc->status == 'em andamento') ? 'warning' : 'default'); ?>"><?php echo ucfirst($os_pmoc->status); ?></span></td>
-                                    <td><b>Data Inicial:</b> <?php echo date('d/m/Y', strtotime($os_pmoc->dataInicial)); ?></td>
-                                    <td><b>Data Final:</b> <?php echo $os_pmoc->dataFinal ? date('d/m/Y', strtotime($os_pmoc->dataFinal)) : '-'; ?></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3"><b>Descrição:</b> <?php echo $os_pmoc->descricao; ?></td>
-                                </tr>
-                            </table>
-                        </div>
-                        <h4>Checklists Realizados</h4>
-                        <a href="<?php echo base_url('pmoc/checklist/' . $os_pmoc->idOsPmoc); ?>" class="btn btn-primary" style="margin-bottom:18px; font-weight:600; border-radius:7px;">Atualizar OS</a>
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Itens Verificados</th>
-                                    <th>Observações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (empty($checklists)) { ?>
-                                    <tr><td colspan="3" style="text-align:center; color:#7b8ca6;">Nenhum checklist realizado.</td></tr>
-                                <?php } else { 
-                                    // Ordenar checklists por data_verificacao decrescente
-                                    usort($checklists, function($a, $b) {
-                                        return strtotime($b->data_verificacao) - strtotime($a->data_verificacao);
-                                    });
-                                    foreach ($checklists as $c) {
-                                ?>
-                                    <tr>
-                                        <td><?php echo date('d/m/Y', strtotime($c->data_verificacao)); ?> <span style="color:#888; font-size:13px;"><?php echo date('H:i', strtotime($c->data_verificacao)); ?></span></td>
-                                        <td>
-                                            <?php 
-                                            $itens_checklist_pmoc = [
-                                                'Limpeza de filtros' => 'limpeza_filtros',
-                                                'Verificação da carga de gás' => 'carga_gas',
-                                                'Condições do isolamento' => 'condicoes_isolamento',
-                                                'Estado da serpentina' => 'estado_serpentina',
-                                                'Bandeja de condensado' => 'bandeja_condensado',
-                                                'Fiação e conexões elétricas' => 'fiacao_conexoes',
-                                                'Dreno (livre e funcional)' => 'dreno',
-                                                'Painel elétrico' => 'painel_eletrico',
-                                                'Grelhas e difusores' => 'grelhas_difusores',
-                                                'Ruídos anormais' => 'ruidos_anormais',
-                                                'Bomba de drenagem (se aplicável)' => 'bomba_drenagem',
-                                                'Controle/termostato' => 'controle_termostato',
-                                                'Vazamentos identificados' => 'vazamentos_identificados'
-                                            ];
-                                            echo '<ul style="list-style:none; padding:0; margin:0;">';
-                                            foreach ($itens_checklist_pmoc as $label => $col) {
-                                                $status_item = isset($c->$col) && $c->$col !== null ? $c->$col : 'Não verificado';
-                                                echo '<li style="margin-bottom:12px; display:flex; align-items:center; gap:10px;">';
-                                                echo '<strong>' . htmlspecialchars($label) . ':</strong> ' . htmlspecialchars($status_item);
-                                                // Buscar fotos deste item
-                                                $fotos = $this->db->where('checklist_id', $c->idChecklist)
-                                                                 ->where('campo', $col)
-                                                                 ->get('checklist_fotos')
-                                                                 ->result();
-                                                if (!empty($fotos)) {
-                                                    echo '<button type="button" class="btn btn-info btn-xs visualizar-imagem" data-imagens="';
-                                                    $img_urls = [];
-                                                    foreach ($fotos as $foto) {
-                                                        $img_urls[] = base_url('uploads/pmoc/' . $foto->nome_arquivo);
-                                                    }
-                                                    echo htmlspecialchars(json_encode($img_urls), ENT_QUOTES, 'UTF-8');
-                                                    echo '">Visualizar Imagem</button>';
-                                                }
-                                                echo '</li>';
-                                            }
-                                            echo '</ul>';
-                                            ?>
-                                        </td>
-                                        <td style="vertical-align:top; max-width:320px; white-space:pre-line; color:#222e3c; font-size:15px;">
-                                            <?php echo !empty($c->observacoes) ? nl2br(htmlspecialchars($c->observacoes)) : '<span style="color:#aaa;">Nenhuma observação.</span>'; ?>
-                                        </td>
-                                    </tr>
-                                <?php }} ?>
-                            </tbody>
-                        </table>
-                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-                        <script>
-                        $(function(){
-                            $(document).on('click', '.visualizar-imagem', function(e){
-                                e.preventDefault();
-                                var imagens = $(this).data('imagens');
-                                if (typeof imagens === 'string') {
-                                    imagens = JSON.parse(imagens);
-                                }
-                                var html = '';
-                                for (var i=0; i<imagens.length; i++) {
-                                    html += '<img src="'+imagens[i]+'" style="max-width:220px; max-height:180px; display:block; margin-bottom:8px; border-radius:6px; border:1px solid #e0e7ef;">';
-                                }
-                                var $btn = $(this);
-                                $('.popover-imagem').remove();
-                                var offset = $btn.offset();
-                                var popover = $('<div class="popover-imagem" style="position:absolute; z-index:9999; background:#fff; border:1.5px solid #dbe3ef; box-shadow:0 2px 12px #e0e7ef66; border-radius:8px; padding:12px;">'+html+'</div>');
-                                $('body').append(popover);
-                                var left = offset.left + $btn.outerWidth() + 10;
-                                var top = offset.top - 10;
-                                popover.css({left:left, top:top});
-                                $(document).on('mousedown.popover', function(ev){
-                                    if (!$(ev.target).closest('.popover-imagem, .visualizar-imagem').length) {
-                                        $('.popover-imagem').remove();
-                                        $(document).off('mousedown.popover');
-                                    }
-                                });
-                            });
-                        });
-                        </script>
-                    </div>
+
+<link rel="stylesheet" href="<?= base_url('assets/css/pmoc-dashcode.css?v=' . @filemtime(FCPATH . 'assets/css/pmoc-dashcode.css')) ?>" />
+
+<?php
+$statusKey = mb_strtolower((string) ($os_pmoc->status ?? 'agendado'));
+$statusMap = [
+    'pendente' => ['Pendente', 'pmoc-tag-neutral'],
+    'agendado' => ['Agendado', 'pmoc-tag-warning'],
+    'em andamento' => ['Em andamento', 'pmoc-tag-warning'],
+    'em_execucao' => ['Em execucao', 'pmoc-tag-warning'],
+    'concluido' => ['Concluido', 'pmoc-tag-success'],
+    'atrasado' => ['Atrasado', 'pmoc-tag-danger'],
+];
+$statusLabel = $statusMap[$statusKey][0] ?? ucfirst($statusKey ?: 'Agendado');
+$statusClass = $statusMap[$statusKey][1] ?? 'pmoc-tag-neutral';
+
+$equipamentoPrincipal = ! empty($equipamentos) ? $equipamentos[0] : null;
+$qtdEquipamentos = is_array($equipamentos) ? count($equipamentos) : 0;
+
+$itensChecklist = [
+    'limpeza_filtros' => 'Limpeza de filtros',
+    'carga_gas' => 'Verificacao da carga de gas',
+    'condicoes_isolamento' => 'Condicoes do isolamento',
+    'estado_serpentina' => 'Estado da serpentina',
+    'bandeja_condensado' => 'Bandeja de condensado',
+    'fiacao_conexoes' => 'Fiacao e conexoes eletricas',
+    'dreno' => 'Dreno (livre e funcional)',
+    'painel_eletrico' => 'Painel eletrico',
+    'grelhas_difusores' => 'Grelhas e difusores',
+    'ruidos_anormais' => 'Ruidos anormais',
+    'bomba_drenagem' => 'Bomba de drenagem',
+    'controle_termostato' => 'Controle/termostato',
+    'vazamentos_identificados' => 'Vazamentos identificados',
+];
+?>
+
+<div class="new122 pmoc-dash pmoc-os">
+    <div class="widget-box" style="margin-top:0;">
+        <div class="pmoc-header">
+            <div class="pmoc-title-wrap">
+                <h3>OS PMOC #<?= (int) $os_pmoc->idOsPmoc ?></h3>
+                <p>Detalhes operacionais, equipamentos vinculados e historico de checklist.</p>
+            </div>
+            <div class="pmoc-top-actions">
+                <a href="<?= base_url('pmoc/plano/' . (int) $os_pmoc->plano_id) ?>" class="btn btn-small"><i class="bx bx-arrow-back"></i> Contrato</a>
+                <a href="<?= base_url('pmoc/editar_os_pmoc/' . (int) $os_pmoc->idOsPmoc) ?>" class="btn btn-small"><i class="bx bx-edit"></i> Editar OS</a>
+                <a href="<?= base_url('pmoc/checklist/' . (int) $os_pmoc->idOsPmoc) ?>" class="btn btn-primary btn-small"><i class="bx bx-clipboard"></i> Atualizar OS</a>
+            </div>
+        </div>
+
+        <div class="widget-content" style="padding:14px;">
+            <div class="pmoc-chip-row pmoc-os-chip-row">
+                <div class="pmoc-chip">Status <b><span class="pmoc-tag <?= $statusClass ?>"><?= $statusLabel ?></span></b></div>
+                <div class="pmoc-chip">Data prevista <b><?= ! empty($os_pmoc->data_prevista) ? date('d/m/Y', strtotime((string) $os_pmoc->data_prevista)) : '-' ?></b></div>
+                <div class="pmoc-chip">Data inicial <b><?= ! empty($os_pmoc->dataInicial) ? date('d/m/Y H:i', strtotime((string) $os_pmoc->dataInicial)) : '-' ?></b></div>
+                <div class="pmoc-chip">Data final <b><?= ! empty($os_pmoc->dataFinal) ? date('d/m/Y H:i', strtotime((string) $os_pmoc->dataFinal)) : '-' ?></b></div>
+                <div class="pmoc-chip">Equipamentos <b><?= (int) $qtdEquipamentos ?></b></div>
+            </div>
+
+            <div class="pmoc-os-summary-grid" style="margin-top:12px;">
+                <div class="pmoc-os-summary-card">
+                    <span>Equipamento principal</span>
+                    <strong><?= $equipamentoPrincipal ? htmlspecialchars((string) ($equipamentoPrincipal->descricao ?: '-')) : '-' ?></strong>
+                    <small>
+                        <?php if ($equipamentoPrincipal): ?>
+                            Modelo: <?= htmlspecialchars((string) ($equipamentoPrincipal->modelo ?: '-')) ?>
+                            | Serie: <?= htmlspecialchars((string) ($equipamentoPrincipal->num_serie ?: '-')) ?>
+                        <?php else: ?>
+                            Nenhum equipamento vinculado.
+                        <?php endif; ?>
+                    </small>
+                </div>
+                <div class="pmoc-os-summary-card">
+                    <span>Tipo de atendimento</span>
+                    <strong><?= htmlspecialchars((string) ($os_pmoc->tipo_atendimento ?: '-')) ?></strong>
+                    <small>Definido no contrato e ajustavel por OS.</small>
+                </div>
+                <div class="pmoc-os-summary-card pmoc-os-summary-card-wide">
+                    <span>Descricao da OS</span>
+                    <strong><?= nl2br(htmlspecialchars((string) ($os_pmoc->descricao ?: '-'))) ?></strong>
                 </div>
             </div>
         </div>
-    </section>
-</div> 
+    </div>
+
+    <div class="widget-box pmoc-section" style="margin-top:12px;">
+        <div class="widget-content" style="padding:14px;">
+            <div class="pmoc-section-head" style="margin-bottom:10px;">
+                <h4 class="pmoc-section-title">Checklists realizados</h4>
+                <span class="pmoc-tag pmoc-tag-neutral">Total: <?= is_array($checklists) ? count($checklists) : 0 ?></span>
+            </div>
+            <div class="pmoc-table-wrap">
+                <table class="table table-bordered table-striped pmoc-table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tecnico</th>
+                            <th>Itens OK</th>
+                            <th>Observacoes</th>
+                            <th>Fotos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($checklists)): ?>
+                            <tr><td colspan="5" class="pmoc-empty" style="text-align:center;">Nenhum checklist realizado.</td></tr>
+                        <?php else: ?>
+                            <?php usort($checklists, function ($a, $b) { return strtotime((string) $b->data_verificacao) - strtotime((string) $a->data_verificacao); }); ?>
+                            <?php foreach ($checklists as $c): ?>
+                                <?php
+                                    $ok = 0;
+                                    foreach (array_keys($itensChecklist) as $col) {
+                                        $valor = mb_strtolower(trim((string) ($c->$col ?? '')));
+                                        if (in_array($valor, ['ok', 'sim', 'conforme', 'realizado'], true)) {
+                                            $ok++;
+                                        }
+                                    }
+                                    $fotosChecklist = $this->db->where('checklist_id', (int) $c->idChecklist)->get('checklist_fotos')->result();
+                                    $imgUrls = [];
+                                    foreach ($fotosChecklist as $foto) {
+                                        $imgUrls[] = base_url('uploads/pmoc/' . $foto->nome_arquivo);
+                                    }
+                                ?>
+                                <tr>
+                                    <td><?= ! empty($c->data_verificacao) ? date('d/m/Y H:i', strtotime((string) $c->data_verificacao)) : '-' ?></td>
+                                    <td><?= htmlspecialchars((string) ($c->tecnico_responsavel ?: '-')) ?></td>
+                                    <td><span class="pmoc-tag pmoc-tag-success"><?= (int) $ok ?>/<?= count($itensChecklist) ?></span></td>
+                                    <td style="max-width:420px;"><?= ! empty($c->observacoes) ? nl2br(htmlspecialchars((string) $c->observacoes)) : '<span class="pmoc-empty">Sem observacoes.</span>' ?></td>
+                                    <td>
+                                        <?php if (! empty($imgUrls)): ?>
+                                            <button type="button" class="btn btn-small pmoc-open-gallery" data-images='<?= htmlspecialchars(json_encode($imgUrls), ENT_QUOTES, 'UTF-8') ?>'>
+                                                Ver fotos (<?= count($imgUrls) ?>)
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="pmoc-empty">Sem fotos</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="pmoc-gallery-modal" class="pmoc-gallery-modal" aria-hidden="true">
+    <div class="pmoc-gallery-content">
+        <button type="button" class="pmoc-gallery-close" aria-label="Fechar">&times;</button>
+        <div class="pmoc-gallery-grid"></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var modal = document.getElementById('pmoc-gallery-modal');
+    var grid = modal ? modal.querySelector('.pmoc-gallery-grid') : null;
+    var closeBtn = modal ? modal.querySelector('.pmoc-gallery-close') : null;
+
+    function closeModal() {
+        if (!modal || !grid) return;
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        grid.innerHTML = '';
+    }
+
+    document.addEventListener('click', function (event) {
+        var trigger = event.target.closest('.pmoc-open-gallery');
+        if (!trigger || !modal || !grid) return;
+
+        var raw = trigger.getAttribute('data-images') || '[]';
+        var images = [];
+        try { images = JSON.parse(raw); } catch (e) { images = []; }
+
+        if (!images.length) return;
+
+        grid.innerHTML = images.map(function (url) {
+            return '<img src="' + url + '" alt="Foto checklist">';
+        }).join('');
+
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+    });
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
+
+    if (modal) {
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) closeModal();
+        });
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') closeModal();
+    });
+})();
+</script>

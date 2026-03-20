@@ -128,15 +128,7 @@ $statusLabels = [
             <div class="pmoc-section-head" style="margin-bottom: 10px;">
                 <h4 class="pmoc-section-title">Cronograma de manutencao (12 ciclos)</h4>
                 <div class="pmoc-top-actions" style="gap:6px;">
-                    <form action="<?= base_url('pmoc/criar_os_pmoc/' . $plano->id_pmoc) ?>" method="post" style="margin:0;">
-                        <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
-                        <input type="hidden" name="data_prevista" value="<?= date('Y-m-d') ?>">
-                        <input type="hidden" name="status" value="agendado">
-                        <?php if ((int) $unidadeId > 0): ?>
-                            <input type="hidden" name="cliente_unidade_id" value="<?= (int) $unidadeId ?>">
-                        <?php endif; ?>
-                        <button type="submit" class="btn btn-primary btn-small">Criar nova OS PMOC</button>
-                    </form>
+                    <a href="<?= base_url('pmoc/nova_os_pmoc/' . (int) $plano->id_pmoc . '?data_prevista=' . date('Y-m-d') . '&unidade_id=' . (int) $unidadeId) ?>" class="btn btn-primary btn-small">Criar nova OS PMOC</a>
                 </div>
             </div>
             <div class="pmoc-status-pills" data-status-filter="#tb-cronograma">
@@ -179,15 +171,7 @@ $statusLabels = [
                                 <td><?= $item->data_execucao ? date('d/m/Y', strtotime($item->data_execucao)) : '-' ?></td>
                                 <td>
                                     <?php if (!$item->os_pmoc_id): ?>
-                                        <form action="<?= base_url('pmoc/criar_os_pmoc/' . $plano->id_pmoc) ?>" method="post" style="margin:0;">
-                                            <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
-                                            <input type="hidden" name="data_prevista" value="<?= htmlspecialchars((string) $item->data_prevista) ?>">
-                                            <input type="hidden" name="status" value="agendado">
-                                            <?php if ((int) $unidadeId > 0): ?>
-                                                <input type="hidden" name="cliente_unidade_id" value="<?= (int) $unidadeId ?>">
-                                            <?php endif; ?>
-                                            <button type="submit" class="btn btn-small">Criar OS nesta data</button>
-                                        </form>
+                                        <a href="<?= base_url('pmoc/nova_os_pmoc/' . (int) $plano->id_pmoc . '?data_prevista=' . htmlspecialchars((string) $item->data_prevista) . '&unidade_id=' . (int) $unidadeId) ?>" class="btn btn-small">Criar OS nesta data</a>
                                     <?php else: ?>
                                         <span class="pmoc-empty">-</span>
                                     <?php endif; ?>

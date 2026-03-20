@@ -635,3 +635,139 @@
   box-shadow: var(--pmoc-shadow-lg);
 }
 
+.pmoc-os .pmoc-os-chip-row {
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+}
+
+.pmoc-os .pmoc-os-form {
+  margin: 0;
+}
+
+.pmoc-os .pmoc-os-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.pmoc-os .pmoc-os-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pmoc-os .pmoc-os-field span {
+  font-size: 12px;
+  color: var(--pmoc-muted);
+  font-weight: 600;
+}
+
+.pmoc-os .pmoc-os-field-wide {
+  grid-column: 1 / -1;
+}
+
+.pmoc-os .pmoc-os-field textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.pmoc-os .pmoc-os-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pmoc-os .pmoc-os-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.pmoc-os .pmoc-os-summary-card {
+  border: 1px solid var(--pmoc-border);
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px 12px;
+  box-shadow: var(--pmoc-shadow);
+}
+
+.pmoc-os .pmoc-os-summary-card span {
+  display: block;
+  font-size: 12px;
+  color: var(--pmoc-muted);
+}
+
+.pmoc-os .pmoc-os-summary-card strong {
+  display: block;
+  margin-top: 4px;
+}
+
+.pmoc-os .pmoc-os-summary-card small {
+  display: block;
+  margin-top: 6px;
+  color: var(--pmoc-muted);
+}
+
+.pmoc-os .pmoc-os-summary-card-wide {
+  grid-column: 1 / -1;
+}
+
+.pmoc-gallery-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 18px;
+}
+
+.pmoc-gallery-modal.is-open {
+  display: flex;
+}
+
+.pmoc-gallery-content {
+  width: min(960px, 100%);
+  max-height: 88vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: var(--pmoc-shadow-lg);
+  padding: 14px;
+  position: relative;
+}
+
+.pmoc-gallery-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: 0;
+  background: transparent;
+  font-size: 30px;
+  line-height: 1;
+  color: #334155;
+}
+
+.pmoc-gallery-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.pmoc-gallery-grid img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--pmoc-border);
+}
+
+@media (max-width: 560px) {
+  .pmoc-os .pmoc-os-grid,
+  .pmoc-os .pmoc-os-chip-row,
+  .pmoc-os .pmoc-os-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

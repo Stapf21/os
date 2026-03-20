@@ -20,5 +20,8 @@ jobs:
           script_stop: true
           script: |
             cd ${{ secrets.HOSTINGER_APP_PATH || secrets.VPS_APP_PATH }}
+            git fetch --prune origin
+            git reset --hard origin/main
+            git clean -fd
             chmod +x scripts/deploy.sh
             DEPLOY_BRANCH=main RUN_FRONTEND_BUILD=0 RUN_MIGRATIONS=1 bash scripts/deploy.sh

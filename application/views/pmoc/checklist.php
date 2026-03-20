@@ -37,6 +37,8 @@ $mapa_names = [
     'Observações adicionais' => 'observacoes',
     'Foto Antes / Depois' => 'foto_antes_depois'
 ];
+
+$osNumero = (int) ($os->idOsPmoc ?? $os->idOs ?? 0);
 ?>
 
 <div class="content-wrapper">
@@ -56,7 +58,7 @@ $mapa_names = [
             <div class="col-xs-12">
                 <div class="box">
                     <div class="box-header">
-                        <h3 class="box-title">Checklist - OS #<?php echo $os->idOs; ?></h3>
+                        <h3 class="box-title">Checklist - OS #<?php echo $osNumero; ?></h3>
                     </div>
                     <div class="box-body">
                         <div class="widget-box">
@@ -66,7 +68,7 @@ $mapa_names = [
                             </div>
                             <div class="widget-content nopadding">
                                 <form action="<?php echo base_url('pmoc/salvarChecklist'); ?>" method="post" enctype="multipart/form-data" class="form-horizontal">
-                                    <input type="hidden" name="os_id" value="<?= $os->idOsPmoc ?>">
+                                    <input type="hidden" name="os_id" value="<?= $osNumero ?>">
                                     <div class="row-fluid">
                                         <div class="span12">
                                             <div class="control-group">
@@ -75,7 +77,13 @@ $mapa_names = [
                                                     <select name="equipamento_id" class="span12" required>
                                                         <option value="">Selecione</option>
                                                         <?php foreach ($equipamentos as $eq): ?>
-                                                            <option value="<?= $eq->idEquipamentos ?>"><?= $eq->descricao ?> (<?= $eq->modelo ?>)</option>
+                                                            <?php
+                                                                $desc = (string) ($eq->descricao ?? $eq->equipamento ?? 'Equipamento');
+                                                                $modelo = (string) ($eq->modelo ?? '');
+                                                            ?>
+                                                            <option value="<?= (int) $eq->idEquipamentos ?>">
+                                                                <?= htmlspecialchars($desc) ?><?= $modelo !== '' ? ' (' . htmlspecialchars($modelo) . ')' : '' ?>
+                                                            </option>
                                                         <?php endforeach; ?>
                                                     </select>
                                                 </div>

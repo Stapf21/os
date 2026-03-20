@@ -12,12 +12,15 @@
   --pmoc-shadow: 0px 0px 1px rgba(40, 41, 61, 0.08), 0px 0.5px 2px rgba(96, 97, 112, 0.16);
   --pmoc-shadow-lg: 0px 2px 4px rgba(40, 41, 61, 0.04), 0px 8px 16px rgba(96, 97, 112, 0.16);
   --pmoc-radius: 12px;
+  --pmoc-accent-a: hsl(224.3 76.3% 48%);
+  --pmoc-accent-b: hsl(213.1 93.9% 67.8%);
 }
 
 .pmoc-dash,
 .pmoc-cl,
 .pmoc-list {
   color: var(--pmoc-text);
+  font-family: "Manrope", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .pmoc-dash .pmoc-header {
@@ -551,3 +554,69 @@
     font-size: 22px;
   }
 }
+
+
+/* Dashcode enhanced look - overrides */
+.pmoc-dash > .widget-box:first-child,
+.pmoc-list .pmoc-list-header,
+.pmoc-cl .pmoc-cl-head {
+  background: linear-gradient(135deg, hsl(210 100% 99%), hsl(214 100% 97%));
+  border-color: hsl(213 75% 88%);
+  box-shadow: 0 12px 28px rgba(59, 96, 186, 0.08);
+}
+
+.pmoc-list .pmoc-list-stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.pmoc-list .pmoc-list-stat-card:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--pmoc-accent-a), var(--pmoc-accent-b));
+}
+
+.pmoc-dash .pmoc-chip,
+.pmoc-cl .pmoc-cl-chip,
+.pmoc-dash .pmoc-kpi,
+.pmoc-cl .pmoc-cl-kpi > div,
+.pmoc-dash .pmoc-money-card,
+.pmoc-list .pmoc-list-stat-card {
+  background: #fff;
+}
+
+.pmoc-dash .btn.btn-primary,
+.pmoc-cl .btn.btn-primary,
+.pmoc-list .btn.btn-primary {
+  background: linear-gradient(135deg, var(--pmoc-accent-a), var(--pmoc-accent-b));
+  border-color: transparent;
+  color: #fff;
+}
+
+.pmoc-dash .btn.btn-success,
+.pmoc-cl .btn.btn-success,
+.pmoc-list .btn.btn-success {
+  background: linear-gradient(135deg, hsl(154 52% 44%), hsl(154 52% 55%));
+  border-color: transparent;
+  color: #fff;
+}
+
+.pmoc-dash .pmoc-kpi,
+.pmoc-cl .pmoc-cl-kpi > div,
+.pmoc-dash .pmoc-money-card,
+.pmoc-list .pmoc-list-stat-card {
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.pmoc-dash .pmoc-kpi:hover,
+.pmoc-cl .pmoc-cl-kpi > div:hover,
+.pmoc-dash .pmoc-money-card:hover,
+.pmoc-list .pmoc-list-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--pmoc-shadow-lg);
+}
+

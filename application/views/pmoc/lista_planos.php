@@ -1,7 +1,7 @@
 ﻿<?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/table-custom.css" />
-<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/pmoc-dashcode.css" />
+<link rel="stylesheet" href="<?= base_url('assets/css/pmoc-dashcode.css?v=' . @filemtime(FCPATH . 'assets/css/pmoc-dashcode.css')) ?>" />
 
 <?php $stats = $statsPmoc ?? []; ?>
 

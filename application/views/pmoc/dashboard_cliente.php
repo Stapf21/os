@@ -35,7 +35,7 @@ $statusLabels = [
 ];
 ?>
 
-<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/pmoc-dashcode.css" />
+<link rel="stylesheet" href="<?= base_url('assets/css/pmoc-dashcode.css?v=' . @filemtime(FCPATH . 'assets/css/pmoc-dashcode.css')) ?>" />
 
 <div class="new122 pmoc-dash">
     <div class="widget-box" style="margin-top: 0;">

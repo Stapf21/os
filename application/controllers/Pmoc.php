@@ -62,11 +62,27 @@ class Pmoc extends MY_Controller
     public function salvar()
     {
         $id = (int) $this->input->post('id');
+        $clienteId = (int) $this->input->post('clientes_id');
+        $tecnicoId = $this->input->post('tecnico_id');
+
+        if ($clienteId <= 0) {
+            $clienteId = $this->resolverClienteIdPorTexto($this->input->post('cliente'));
+        }
+
+        if ($clienteId <= 0) {
+            $this->session->set_flashdata('error', 'Selecione um cliente valido na lista para salvar o plano.');
+            redirect($id ? 'pmoc/editar/' . $id : 'pmoc/novo');
+            return;
+        }
+
+        if ((int) $tecnicoId <= 0 && trim((string) $this->input->post('tecnico')) !== '') {
+            $tecnicoId = $this->resolverTecnicoIdPorTexto($this->input->post('tecnico'));
+        }
 
         $data = [
-            'clientes_id' => (int) $this->input->post('clientes_id'),
+            'clientes_id' => (int) $clienteId,
             'frequencia_manutencao' => $this->input->post('frequencia'),
-            'tecnico_responsavel' => $this->input->post('tecnico_id') ?: null,
+            'tecnico_responsavel' => ((int) $tecnicoId > 0) ? (int) $tecnicoId : null,
             'nome_plano' => $this->input->post('nome_plano'),
             'valor_mensal' => $this->parseCurrency($this->input->post('valor_mensal')),
             'data_inicio_contrato' => $this->input->post('data_inicio_contrato') ?: null,
@@ -93,7 +109,7 @@ class Pmoc extends MY_Controller
         if ($resultado) {
             $this->session->set_flashdata('success', $mensagem);
         } else {
-            $this->session->set_flashdata('error', 'Erro ao salvar o plano.');
+            $this->session->set_flashdata('error', 'Erro ao salvar o plano. Verifique os campos obrigatorios e tente novamente.');
         }
 
         redirect('pmoc');
@@ -475,5 +491,69 @@ class Pmoc extends MY_Controller
         $value = str_replace('.', '', (string) $value);
         $value = str_replace(',', '.', $value);
         return (float) $value;
+    }
+
+    private function resolverClienteIdPorTexto($texto)
+    {
+        $texto = trim((string) $texto);
+        if ($texto === '') {
+            return 0;
+        }
+
+        $cliente = $this->db
+            ->select('idClientes')
+            ->from('clientes')
+            ->group_start()
+            ->where('nomeCliente', $texto)
+            ->or_where('documento', $texto)
+            ->or_where('email', $texto)
+            ->group_end()
+            ->limit(1)
+            ->get()
+            ->row();
+
+        if ($cliente) {
+            return (int) $cliente->idClientes;
+        }
+
+        $clienteLike = $this->db
+            ->select('idClientes')
+            ->from('clientes')
+            ->like('nomeCliente', $texto)
+            ->limit(1)
+            ->get()
+            ->row();
+
+        return $clienteLike ? (int) $clienteLike->idClientes : 0;
+    }
+
+    private function resolverTecnicoIdPorTexto($texto)
+    {
+        $texto = trim((string) $texto);
+        if ($texto === '') {
+            return 0;
+        }
+
+        $tecnico = $this->db
+            ->select('idUsuarios')
+            ->from('usuarios')
+            ->where('nome', $texto)
+            ->limit(1)
+            ->get()
+            ->row();
+
+        if ($tecnico) {
+            return (int) $tecnico->idUsuarios;
+        }
+
+        $tecnicoLike = $this->db
+            ->select('idUsuarios')
+            ->from('usuarios')
+            ->like('nome', $texto)
+            ->limit(1)
+            ->get()
+            ->row();
+
+        return $tecnicoLike ? (int) $tecnicoLike->idUsuarios : 0;
     }
 }

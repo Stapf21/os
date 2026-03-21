@@ -1285,15 +1285,27 @@
             eventClick: function(info) {
                 var eventObj = info.event.extendedProps;
                 $('#modalId').html(eventObj.id);
-                $('#modalIdVisualizar').attr("href", "<?php echo base_url(); ?>index.php/os/visualizar/" + eventObj.id);
-                if (eventObj.editar) {
-                    $('#modalIdEditar').show();
-                    $('#linkExcluir').show();
-                    $('#modalIdEditar').attr("href", "<?php echo base_url(); ?>index.php/os/editar/" + eventObj.id);
-                    $('#modalIdExcluir').val(eventObj.id);
-                } else {
-                    $('#modalIdEditar').hide();
+                var origem = eventObj.origem || 'os';
+                if (origem === 'pmoc') {
+                    $('#modalIdVisualizar').attr("href", "<?php echo base_url(); ?>index.php/pmoc/os_pmoc/" + eventObj.id);
+                    if (eventObj.editar) {
+                        $('#modalIdEditar').show();
+                        $('#modalIdEditar').attr("href", "<?php echo base_url(); ?>index.php/pmoc/editar_os_pmoc/" + eventObj.id);
+                    } else {
+                        $('#modalIdEditar').hide();
+                    }
                     $('#linkExcluir').hide();
+                } else {
+                    $('#modalIdVisualizar').attr("href", "<?php echo base_url(); ?>index.php/os/visualizar/" + eventObj.id);
+                    if (eventObj.editar) {
+                        $('#modalIdEditar').show();
+                        $('#linkExcluir').show();
+                        $('#modalIdEditar').attr("href", "<?php echo base_url(); ?>index.php/os/editar/" + eventObj.id);
+                        $('#modalIdExcluir').val(eventObj.id);
+                    } else {
+                        $('#modalIdEditar').hide();
+                        $('#linkExcluir').hide();
+                    }
                 }
                 $('#modalCliente').html(eventObj.cliente);
                 $('#modalDataInicial').html(eventObj.dataInicial);

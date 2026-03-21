@@ -663,6 +663,11 @@ class Mapos extends MY_Controller {
             $end,
             $status
         );
+        $allPmoc = $this->mapos_model->calendarioPmoc(
+            $start,
+            $end,
+            $status
+        );
         $events = array_map(function ($os) {
             switch ($os->status) {
                 case 'Aberto':
@@ -719,6 +724,59 @@ class Mapos extends MY_Controller {
                 ],
             ];
         }, $allOs);
+
+        $eventsPmoc = array_map(function ($visita) {
+            $statusVisita = mb_strtolower(trim((string) ($visita->status ?? 'agendado')));
+            switch ($statusVisita) {
+                case 'concluido':
+                case 'concluído':
+                    $cor = '#10b981';
+                    break;
+                case 'em andamento':
+                case 'em_execucao':
+                case 'em execução':
+                    $cor = '#f59e0b';
+                    break;
+                case 'atrasado':
+                    $cor = '#ef4444';
+                    break;
+                case 'agendado':
+                default:
+                    $cor = '#2563eb';
+                    break;
+            }
+
+            $dataPrevista = ! empty($visita->data_prevista) ? date('d/m/Y', strtotime((string) $visita->data_prevista)) : '-';
+            $tecnico = (string) ($visita->tecnico_nome ?: 'Nao definido');
+            $plano = (string) ($visita->nome_plano ?: 'PMOC');
+            $descricao = (string) ($visita->descricao ?: 'Visita tecnica PMOC');
+            $tipoAtendimento = (string) ($visita->tipo_atendimento ?: '-');
+
+            return [
+                'title' => "PMOC #{$visita->idOsPmoc} - {$visita->nomeCliente}",
+                'start' => $visita->data_prevista,
+                'end' => $visita->data_prevista,
+                'color' => $cor,
+                'extendedProps' => [
+                    'id' => $visita->idOsPmoc,
+                    'origem' => 'pmoc',
+                    'cliente' => '<b>Cliente:</b> ' . $visita->nomeCliente,
+                    'dataInicial' => '<b>Data da visita:</b> ' . $dataPrevista,
+                    'dataFinal' => '<b>Data da visita:</b> ' . $dataPrevista,
+                    'garantia' => '<b>Plano:</b> ' . $plano,
+                    'status' => '<b>Status da visita:</b> ' . ucfirst(str_replace('_', ' ', $statusVisita)),
+                    'description' => '<b>Tipo de atendimento:</b> ' . strip_tags($tipoAtendimento),
+                    'defeito' => '<b>Tecnico:</b> ' . strip_tags($tecnico),
+                    'observacoes' => '<b>Descricao:</b> ' . strip_tags($descricao),
+                    'total' => '<b>Origem:</b> PMOC',
+                    'desconto' => '-',
+                    'valorFaturado' => '-',
+                    'editar' => true,
+                ],
+            ];
+        }, $allPmoc);
+
+        $events = array_merge($events, $eventsPmoc);
 
         return $this->output
             ->set_content_type('application/json')

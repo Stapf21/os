@@ -164,6 +164,7 @@ class Pmoc extends MY_Controller
         $this->data['dataFim'] = $dataFim;
         $this->data['equipamentos'] = $this->pmoc_model->getEquipamentos($plano->clientes_id, $unidadeId ?: null);
         $this->data['unidades'] = $this->pmoc_model->getUnidades($plano->clientes_id);
+        $this->data['tecnicos'] = $this->usuarios_model->getAll();
         $this->data['cronograma'] = $this->pmoc_model->getCronograma($plano, 12, $unidadeId ?: null);
         $this->data['resumoOs'] = $this->pmoc_model->getResumoOsByPlano($plano->id_pmoc, $unidadeId ?: null);
         $this->data['relatoriosPmoc'] = $this->pmoc_model->getRelatoriosByPlano($plano->id_pmoc, $unidadeId ?: null);
@@ -251,6 +252,10 @@ class Pmoc extends MY_Controller
 
         $clienteUnidadeId = (int) $this->input->post('cliente_unidade_id');
         $clienteUnidadeId = $clienteUnidadeId > 0 ? $clienteUnidadeId : null;
+        $tecnicoId = (int) $this->input->post('usuarios_id');
+        if ($tecnicoId <= 0) {
+            $tecnicoId = (int) $this->session->userdata('id_admin');
+        }
         $status = $this->normalizarStatusOsPmoc($this->input->post('status'));
         $dataPrevista = $this->input->post('data_prevista');
         if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $dataPrevista)) {
@@ -272,7 +277,7 @@ class Pmoc extends MY_Controller
             'plano_id' => (int) $plano->id_pmoc,
             'clientes_id' => (int) $plano->clientes_id,
             'cliente_unidade_id' => $clienteUnidadeId,
-            'usuarios_id' => (int) $this->session->userdata('id_admin'),
+            'usuarios_id' => $tecnicoId,
             'status' => $status,
             'descricao' => trim((string) $this->input->post('descricao')),
             'tipo_atendimento' => trim((string) $this->input->post('tipo_atendimento')),
@@ -298,6 +303,10 @@ class Pmoc extends MY_Controller
         }
 
         $this->session->set_flashdata('success', 'OS PMOC criada com sucesso.');
+        if ((int) $this->input->post('redirect_plano') === 1) {
+            redirect('pmoc/plano/' . (int) $plano->id_pmoc . '?tab=cronograma&unidade_id=' . (int) $clienteUnidadeId);
+            return;
+        }
         redirect('pmoc/os_pmoc/' . (int) $idOsPmoc);
     }
 
@@ -396,6 +405,10 @@ class Pmoc extends MY_Controller
 
         $dataPrevista = $this->input->post('data_prevista') ?: date('Y-m-d');
         $clienteUnidadeId = $this->input->post('cliente_unidade_id') ?: null;
+        $tecnicoId = (int) $this->input->post('usuarios_id');
+        if ($tecnicoId <= 0) {
+            $tecnicoId = (int) $this->session->userdata('id_admin');
+        }
         $status = $this->normalizarStatusOsPmoc($this->input->post('status') ?: 'agendado');
 
         if ($this->existeOsDuplicada((int) $plano_id, $dataPrevista, $clienteUnidadeId)) {
@@ -408,7 +421,7 @@ class Pmoc extends MY_Controller
             'plano_id' => $plano_id,
             'clientes_id' => $plano->clientes_id,
             'cliente_unidade_id' => $clienteUnidadeId,
-            'usuarios_id' => $this->session->userdata('id_admin'),
+            'usuarios_id' => $tecnicoId,
             'status' => $status,
             'descricao' => 'Execucao de manutencao preventiva conforme contrato PMOC.',
             'tipo_atendimento' => $plano->tipo_atendimento_padrao,
@@ -430,6 +443,10 @@ class Pmoc extends MY_Controller
         }
 
         $this->session->set_flashdata('success', 'OS PMOC criada e vinculada aos equipamentos.');
+        if ((int) $this->input->post('redirect_plano') === 1) {
+            redirect('pmoc/plano/' . (int) $plano_id . '?tab=cronograma&unidade_id=' . (int) $clienteUnidadeId);
+            return;
+        }
         redirect('pmoc/checklist/' . $id_os_pmoc);
     }
 

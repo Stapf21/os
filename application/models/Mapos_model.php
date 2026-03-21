@@ -242,6 +242,36 @@ class Mapos_model extends CI_Model
         return $this->db->get()->result();
     }
 
+    public function calendarioPmoc($start, $end, $status = null)
+    {
+        if (! $this->db->table_exists('os_pmoc')) {
+            return [];
+        }
+
+        $startDate = $start ? date('Y-m-d', strtotime((string) $start)) : date('Y-m-01');
+        $endDate = $end ? date('Y-m-d', strtotime((string) $end)) : date('Y-m-t');
+
+        $this->db->select('
+            os_pmoc.*,
+            clientes.nomeCliente,
+            usuarios.nome as tecnico_nome,
+            pmoc_planos.nome_plano
+        ');
+        $this->db->from('os_pmoc');
+        $this->db->join('clientes', 'clientes.idClientes = os_pmoc.clientes_id', 'left');
+        $this->db->join('usuarios', 'usuarios.idUsuarios = os_pmoc.usuarios_id', 'left');
+        $this->db->join('pmoc_planos', 'pmoc_planos.id_pmoc = os_pmoc.plano_id', 'left');
+        $this->db->where('DATE(os_pmoc.data_prevista) >=', $startDate);
+        $this->db->where('DATE(os_pmoc.data_prevista) <=', $endDate);
+        if (! empty($status)) {
+            $statusLower = mb_strtolower(trim((string) $status));
+            $this->db->where('LOWER(os_pmoc.status)', $statusLower);
+        }
+        $this->db->order_by('os_pmoc.data_prevista', 'asc');
+
+        return $this->db->get()->result();
+    }
+
     public function getProdutosMinimo()
     {
         $sql = 'SELECT * FROM produtos WHERE estoque <= estoqueMinimo AND estoqueMinimo > 0 LIMIT 10';

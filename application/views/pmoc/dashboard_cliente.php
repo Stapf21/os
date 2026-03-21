@@ -164,6 +164,25 @@ if (!empty($unidades) && (int) $unidadeId > 0) {
                     <a href="<?= base_url('pmoc/nova_os_pmoc/' . (int) $plano->id_pmoc . '?data_prevista=' . date('Y-m-d') . '&unidade_id=' . (int) $unidadeId) ?>" class="btn btn-primary btn-small">Criar nova OS PMOC</a>
                 </div>
             </div>
+            <form action="<?= base_url('pmoc/criar_os_pmoc/' . (int) $plano->id_pmoc) ?>" method="post" class="pmoc-inline-form" style="margin-bottom:10px;">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
+                <input type="hidden" name="status" value="agendado">
+                <input type="hidden" name="redirect_plano" value="1">
+                <?php if ((int) $unidadeId > 0): ?>
+                    <input type="hidden" name="cliente_unidade_id" value="<?= (int) $unidadeId ?>">
+                <?php endif; ?>
+                <label style="margin:0;">Agendamento manual</label>
+                <input type="date" name="data_prevista" value="<?= date('Y-m-d') ?>" required>
+                <select name="usuarios_id" style="width:220px;">
+                    <option value="">Tecnico responsavel</option>
+                    <?php foreach (($tecnicos ?? []) as $tec): ?>
+                        <option value="<?= (int) $tec->idUsuarios ?>" <?= ((int) ($plano->tecnico_responsavel ?? 0) === (int) $tec->idUsuarios) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars((string) $tec->nome) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="btn btn-small btn-primary">Agendar visita</button>
+            </form>
             <div class="pmoc-status-pills" data-status-filter="#tb-cronograma">
                 <button type="button" class="pmoc-status-pill active" data-status="">Todos</button>
                 <button type="button" class="pmoc-status-pill" data-status="agendado">Agendado</button>

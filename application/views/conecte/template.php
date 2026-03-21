@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $clientePmocOnly = (bool) $this->session->userdata('cliente_pmoc_only');
 ?>
 <!DOCTYPE html>

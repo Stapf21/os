@@ -1,105 +1,162 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 
-<div class="content-wrapper" style="background: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center;">
-    <section class="content-header" style="margin-bottom: 18px; width: 100%; max-width: 1100px;">
-        <h1 style="font-size: 2.4rem; font-weight: 800; color: #222e3c; margin-bottom: 2px; letter-spacing: -1px;">
-            Histórico do Equipamento
-            <small style="font-size: 1.15rem; color: #7b8ca6; font-weight: 400; margin-left: 6px;">Registro de Manutenções</small>
-        </h1>
-        <ol class="breadcrumb" style="background: none; padding-left: 0; margin-bottom: 0; font-size: 0.98rem;">
-            <li><a href="<?php echo base_url(); ?>" style="color: #7b8ca6;"><i class="fa fa-dashboard"></i> Início</a></li>
-            <li><a href="<?php echo base_url(); ?>pmoc" style="color: #7b8ca6;">Pmoc</a></li>
-            <li class="active" style="color: #f59e42;">Histórico</li>
-        </ol>
-    </section>
-    <section class="content" style="width: 100%; display: flex; justify-content: center;">
-        <div class="box" style="border-radius: 16px; box-shadow: 0 4px 24px #e0e7ef55; border: none; background: #fff; width: 100%; max-width: 1100px; margin-bottom: 32px;">
-            <div class="box-header" style="border-bottom: 1.5px solid #e0e7ef; padding: 24px 32px 10px 32px;">
-                <h3 class="box-title" style="font-size: 1.35rem; font-weight: 700; color: #222e3c; margin:0;">Histórico - <?php echo $equipamento->nome ?? ($equipamento->descricao ?? ''); ?></h3>
-                    </div>
-            <div class="box-body" style="padding: 24px 32px;">
-                        <div class="table-responsive">
-                    <table class="table table-bordered table-striped" style="background: #fff; border-radius: 8px; overflow: hidden; margin-bottom:0;">
-                        <thead style="background: #f1f5fa; position: sticky; top: 0; z-index: 2;">
-                                    <tr>
-                                <th style="min-width: 90px;">Data</th>
-                                <th style="min-width: 60px;">OS</th>
-                                <th style="min-width: 120px;">Status</th>
-                                <th style="min-width: 180px;">Observações</th>
-                                <th style="min-width: 90px;">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                            <?php if (empty($historico)) { ?>
-                                <tr>
-                                    <td colspan="5" style="text-align:center; color:#7b8ca6; font-size:1.15rem; padding: 48px 0; background: #f8fafb;">
-                                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
-                                            <i class="fa fa-history" style="font-size:2.5rem; color:#e0e7ef;"></i>
-                                            Nenhum registro de manutenção encontrado para este equipamento.
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php } else { 
-                                $CI = &get_instance();
-                                $CI->load->model('OsPmoc_model');
-                                foreach ($historico as $h) { 
-                                    $os_pmoc = $CI->OsPmoc_model->getById($h->os_pmoc_id);
-                                    $status_os = $os_pmoc ? ucfirst($os_pmoc->status) : '-';
-                            ?>
-                                <tr style="background: <?php echo ($h === reset($historico) || $h === end($historico)) ? '#f9fafb' : '#fff'; ?>;">
-                                    <td><?php echo date('d/m/Y', strtotime($h->data_verificacao)); ?></td>
-                                    <td><a href="<?php echo base_url('pmoc/os_pmoc/' . $h->os_pmoc_id); ?>" style="color:#2980b9; font-weight:600;">#<?php echo $h->os_pmoc_id ?? $h->idChecklist; ?></a></td>
-                                    <td>
-                                        <span class="label label-<?php echo ($status_os == 'Concluido') ? 'success' : (($status_os == 'Em andamento') ? 'warning' : 'default'); ?>">
-                                            <?php echo $status_os; ?>
-                                        </span>
-                                    </td>
-                                    <td style="font-size: 1rem; color: #222e3c;">
-                                        <?php 
-                                        $observacoes = json_decode($h->observacoes, true);
-                                        if ($observacoes && is_array($observacoes)) {
-                                            foreach ($observacoes as $item => $obs) {
-                                                if (!empty($obs)) {
-                                                    echo "<div style='margin-bottom:2px;'><strong style='color:#2980b9;'>$item:</strong> $obs</div>";
-                                                }
-                                            }
-                                        }
-                                        ?>
-                                    </td>
-                                    <td>
-                                        <a href="<?php echo base_url('pmoc/os_pmoc/' . $h->os_pmoc_id); ?>" class="btn btn-success btn-xs" style="border-radius:6px; font-size:14px; padding:7px 16px; font-weight:600; box-shadow:0 1px 4px #e0e7ef33;" title="Visualizar OS PMOC">
-                                            <i class="fa fa-eye"></i> Visualizar
-                                        </a>
-                                        <a href="<?php echo base_url('pmoc/excluir_checklist/' . $h->idChecklist . '/' . $equipamento->idEquipamentos); ?>" class="btn btn-danger btn-xs" style="border-radius:6px; font-size:14px; padding:7px 16px; font-weight:600; margin-left:6px; box-shadow:0 1px 4px #e0e7ef33;" title="Excluir Checklist" onclick="return confirm('Tem certeza que deseja excluir este checklist?');">
-                                            <i class="fa fa-trash"></i> Excluir
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php }} ?>
-                                </tbody>
-                            </table>
-                </div>
+<link rel="stylesheet" href="<?= base_url('assets/css/pmoc-dashcode.css?v=' . @filemtime(FCPATH . 'assets/css/pmoc-dashcode.css')) ?>" />
+
+<?php
+$equipNome = (string) ($equipamento->nome ?? $equipamento->descricao ?? 'Equipamento');
+$equipModelo = (string) ($equipamento->modelo ?? '');
+$equipSerie = (string) ($equipamento->num_serie ?? '');
+
+$total = is_array($historico ?? null) ? count($historico) : 0;
+$concluidos = 0;
+$emAndamento = 0;
+$ultimaData = null;
+
+foreach (($historico ?? []) as $h) {
+    $statusRaw = mb_strtolower(trim((string) ($h->status_os ?? '')));
+    if ($statusRaw === 'concluido' || $statusRaw === 'concluído' || $statusRaw === 'finalizado') {
+        $concluidos++;
+    }
+    if ($statusRaw === 'em andamento' || $statusRaw === 'em_execucao' || $statusRaw === 'em execução') {
+        $emAndamento++;
+    }
+    if (!empty($h->data_verificacao)) {
+        $dt = strtotime((string) $h->data_verificacao);
+        if ($dt && ($ultimaData === null || $dt > $ultimaData)) {
+            $ultimaData = $dt;
+        }
+    }
+}
+?>
+
+<div class="new122 pmoc-dash pmoc-history">
+    <div class="widget-box" style="margin-top:0;">
+        <div class="pmoc-header">
+            <div class="pmoc-title-wrap">
+                <h3>Historico do Equipamento</h3>
+                <p>Registro consolidado das manutencoes realizadas no ativo.</p>
+            </div>
+            <div class="pmoc-top-actions">
+                <a href="<?= base_url('pmoc') ?>" class="btn btn-small"><i class="bx bx-arrow-back"></i> Voltar PMOC</a>
+                <a href="<?= base_url('pmoc/plano/' . (int) ($equipamento->plano_id ?? 0)) ?>" class="btn btn-small" style="display:none;">Contrato</a>
             </div>
         </div>
-    </section>
-</div> 
-<style>
-@media (max-width: 1100px) {
-    .content-wrapper, .content-header, .box, .box-body {
-        max-width: 100vw !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-    }
-}
-@media (max-width: 900px) {
-    .content-wrapper .box, .content-wrapper .box-body, .content-wrapper .table-responsive {
-        padding: 0 !important;
-    }
-    .content-wrapper .table {
-        font-size: 13px;
-    }
-    .content-header h1 {
-        font-size: 1.3rem !important;
-    }
-}
-</style> 
+
+        <div class="widget-content" style="padding:14px;">
+            <div class="pmoc-chip-row pmoc-history-chip-row">
+                <div class="pmoc-chip">Equipamento <b><?= htmlspecialchars($equipNome) ?></b></div>
+                <div class="pmoc-chip">Modelo <b><?= htmlspecialchars($equipModelo !== '' ? $equipModelo : '-') ?></b></div>
+                <div class="pmoc-chip">Serie <b><?= htmlspecialchars($equipSerie !== '' ? $equipSerie : '-') ?></b></div>
+                <div class="pmoc-chip">Ultima manutencao <b><?= $ultimaData ? date('d/m/Y H:i', $ultimaData) : '-' ?></b></div>
+            </div>
+
+            <div class="pmoc-kpi-grid pmoc-history-kpi-grid" style="margin-top:10px;">
+                <div class="pmoc-kpi"><div class="pmoc-kpi-label">Total de registros</div><div class="pmoc-kpi-value"><?= (int) $total ?></div></div>
+                <div class="pmoc-kpi pmoc-kpi-success"><div class="pmoc-kpi-label">Concluidos</div><div class="pmoc-kpi-value"><?= (int) $concluidos ?></div></div>
+                <div class="pmoc-kpi pmoc-kpi-warning"><div class="pmoc-kpi-label">Em andamento</div><div class="pmoc-kpi-value"><?= (int) $emAndamento ?></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="widget-box pmoc-section" style="margin-top:12px;">
+        <div class="widget-content" style="padding:14px;">
+            <div class="pmoc-section-head" style="margin-bottom:10px;">
+                <h4 class="pmoc-section-title">Registros de manutencao</h4>
+                <span class="pmoc-tag pmoc-tag-neutral">Total: <?= (int) $total ?></span>
+            </div>
+
+            <div class="pmoc-search">
+                <input type="text" placeholder="Buscar por OS, status, observacoes..." data-table-search="#tb-historico-equipamento">
+            </div>
+
+            <div class="pmoc-table-wrap">
+                <table class="table table-bordered table-striped pmoc-table-hover" id="tb-historico-equipamento">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>OS</th>
+                            <th>Status</th>
+                            <th>Observacoes</th>
+                            <th>Acoes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($historico)): ?>
+                            <tr>
+                                <td colspan="5" class="pmoc-empty" style="text-align:center; padding:26px 10px;">Nenhum registro de manutencao encontrado para este equipamento.</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($historico as $h): ?>
+                                <?php
+                                    $statusRaw = mb_strtolower(trim((string) ($h->status_os ?? '')));
+                                    $statusLabel = ucfirst(str_replace('_', ' ', $statusRaw ?: 'pendente'));
+                                    $statusClass = 'pmoc-tag-neutral';
+                                    if (in_array($statusRaw, ['concluido', 'concluído', 'finalizado'], true)) {
+                                        $statusClass = 'pmoc-tag-success';
+                                    } elseif (in_array($statusRaw, ['em andamento', 'em_execucao', 'em execução'], true)) {
+                                        $statusClass = 'pmoc-tag-warning';
+                                    } elseif ($statusRaw === 'atrasado') {
+                                        $statusClass = 'pmoc-tag-danger';
+                                    }
+
+                                    $obsHtml = '';
+                                    $obsRaw = (string) ($h->observacoes ?? '');
+                                    $obsJson = json_decode($obsRaw, true);
+                                    if (is_array($obsJson)) {
+                                        $chunks = [];
+                                        foreach ($obsJson as $k => $v) {
+                                            if (trim((string) $v) === '') {
+                                                continue;
+                                            }
+                                            $chunks[] = '<div><b>' . htmlspecialchars((string) $k) . ':</b> ' . htmlspecialchars((string) $v) . '</div>';
+                                        }
+                                        $obsHtml = !empty($chunks) ? implode('', $chunks) : '<span class="pmoc-empty">Sem observacoes.</span>';
+                                    } else {
+                                        $obsHtml = trim($obsRaw) !== ''
+                                            ? nl2br(htmlspecialchars($obsRaw))
+                                            : '<span class="pmoc-empty">Sem observacoes.</span>';
+                                    }
+                                ?>
+                                <tr>
+                                    <td><?= !empty($h->data_verificacao) ? date('d/m/Y H:i', strtotime((string) $h->data_verificacao)) : '-' ?></td>
+                                    <td>
+                                        <a href="<?= base_url('pmoc/os_pmoc/' . (int) ($h->os_pmoc_id ?? 0)) ?>">#<?= (int) ($h->os_pmoc_id ?? $h->idChecklist ?? 0) ?></a>
+                                    </td>
+                                    <td><span class="pmoc-tag <?= $statusClass ?>"><?= htmlspecialchars($statusLabel) ?></span></td>
+                                    <td class="pmoc-history-obs"><?= $obsHtml ?></td>
+                                    <td class="pmoc-history-actions">
+                                        <a href="<?= base_url('pmoc/os_pmoc/' . (int) ($h->os_pmoc_id ?? 0)) ?>" class="btn btn-small btn-success">
+                                            <i class="bx bx-show"></i> Visualizar
+                                        </a>
+                                        <a href="<?= base_url('pmoc/excluir_checklist/' . (int) $h->idChecklist . '/' . (int) $equipamento->idEquipamentos) ?>" class="btn btn-small btn-danger" onclick="return confirm('Tem certeza que deseja excluir este checklist?');">
+                                            <i class="bx bx-trash"></i> Excluir
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    function norm(v) { return (v || '').toString().toLowerCase(); }
+
+    document.querySelectorAll('[data-table-search]').forEach(function (input) {
+        var table = document.querySelector(input.getAttribute('data-table-search'));
+        if (!table) return;
+        var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
+        input.addEventListener('input', function () {
+            var q = norm(input.value);
+            rows.forEach(function (tr) {
+                var visible = norm(tr.textContent).indexOf(q) > -1;
+                tr.style.display = visible ? '' : 'none';
+            });
+        });
+    });
+})();
+</script>

@@ -23,6 +23,20 @@ $tecnicos = is_array($tecnicos ?? null) ? $tecnicos : [];
 $servicosPadrao = is_array($servicosPadrao ?? null) ? $servicosPadrao : [];
 $tecnicoPadrao = (string) ($tecnicoPadrao ?? '');
 $tipoServicoPadrao = (string) ($tipoServicoPadrao ?? '');
+$nomesTecnicos = [];
+foreach ($tecnicos as $tecItem) {
+    $n = trim((string) ($tecItem->nome ?? ''));
+    if ($n !== '') {
+        $nomesTecnicos[$n] = true;
+    }
+}
+$nomesServicos = [];
+foreach ($servicosPadrao as $srvItem) {
+    $n = trim((string) ($srvItem->nome ?? ''));
+    if ($n !== '') {
+        $nomesServicos[$n] = true;
+    }
+}
 
 $itensChecklist = [
     'limpeza_filtros' => ['label' => 'Limpeza de filtros', 'opcoes' => ['Pendente', 'OK', 'Nao Aplicavel']],
@@ -96,54 +110,66 @@ $action = base_url('pmoc/salvarChecklist');
 
                     <label class="pmoc-checklist-field">
                         <span>Tecnico responsavel</span>
-                        <input type="text" name="tecnico_responsavel" list="pmoc-tecnicos-list" value="<?= htmlspecialchars($tecnicoPadrao) ?>" placeholder="Nome do tecnico" required>
+                        <select name="tecnico_responsavel" required>
+                            <option value="">Selecione</option>
+                            <?php foreach ($tecnicos as $tec): ?>
+                                <?php $nomeTec = trim((string) ($tec->nome ?? '')); ?>
+                                <?php if ($nomeTec === '') continue; ?>
+                                <option value="<?= htmlspecialchars($nomeTec) ?>" <?= ($tecnicoPadrao === $nomeTec) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($nomeTec) ?>
+                                </option>
+                            <?php endforeach; ?>
+                            <?php if ($tecnicoPadrao !== '' && !isset($nomesTecnicos[$tecnicoPadrao])): ?>
+                                <option value="<?= htmlspecialchars($tecnicoPadrao) ?>" selected><?= htmlspecialchars($tecnicoPadrao) ?></option>
+                            <?php endif; ?>
+                        </select>
                     </label>
 
                     <label class="pmoc-checklist-field">
                         <span>Tipo de servico</span>
-                        <input type="text" name="tipo_servico" list="pmoc-servicos-list" value="<?= htmlspecialchars($tipoServicoPadrao) ?>" placeholder="Ex: manutencao preventiva" required>
+                        <select name="tipo_servico" required>
+                            <option value="">Selecione</option>
+                            <?php foreach ($servicosPadrao as $srv): ?>
+                                <?php $nomeServico = trim((string) ($srv->nome ?? '')); ?>
+                                <?php if ($nomeServico === '') continue; ?>
+                                <option value="<?= htmlspecialchars($nomeServico) ?>" <?= ($tipoServicoPadrao === $nomeServico) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($nomeServico) ?>
+                                </option>
+                            <?php endforeach; ?>
+                            <?php if ($tipoServicoPadrao !== '' && !isset($nomesServicos[$tipoServicoPadrao])): ?>
+                                <option value="<?= htmlspecialchars($tipoServicoPadrao) ?>" selected><?= htmlspecialchars($tipoServicoPadrao) ?></option>
+                            <?php endif; ?>
+                        </select>
                     </label>
                 </div>
-                <datalist id="pmoc-servicos-list">
-                    <?php foreach ($servicosPadrao as $srv): ?>
-                        <?php $nomeServico = trim((string) ($srv->nome ?? '')); ?>
-                        <?php if ($nomeServico === '') continue; ?>
-                        <option value="<?= htmlspecialchars($nomeServico) ?>"></option>
-                    <?php endforeach; ?>
-                </datalist>
-                <datalist id="pmoc-tecnicos-list">
-                    <?php foreach ($tecnicos as $tec): ?>
-                        <?php $nomeTec = trim((string) ($tec->nome ?? '')); ?>
-                        <?php if ($nomeTec === '') continue; ?>
-                        <option value="<?= htmlspecialchars($nomeTec) ?>"></option>
-                    <?php endforeach; ?>
-                </datalist>
 
                 <?php if (! empty($equipamentosDisponiveis)): ?>
                     <div class="pmoc-checklist-notes" style="margin-bottom:12px;">
-                        <label class="pmoc-checklist-field" style="margin:0;">
+                        <div class="pmoc-checklist-field" style="margin:0;">
                             <span>Adicionar equipamentos na OS (opcional)</span>
-                            <select name="equipamentos_adicionais[]" multiple size="4">
-                                <?php
-                                    $jaVinculados = [];
-                                    foreach (($equipamentos ?? []) as $eqV) {
-                                        $jaVinculados[(int) $eqV->idEquipamentos] = true;
-                                    }
-                                ?>
+                            <?php
+                                $jaVinculados = [];
+                                foreach (($equipamentos ?? []) as $eqV) {
+                                    $jaVinculados[(int) $eqV->idEquipamentos] = true;
+                                }
+                            ?>
+                            <div class="pmoc-checklist-equip-list">
                                 <?php foreach ($equipamentosDisponiveis as $eqDisp): ?>
                                     <?php
                                         $eqId = (int) $eqDisp->idEquipamentos;
                                         $desc = (string) ($eqDisp->descricao ?? $eqDisp->equipamento ?? 'Equipamento');
                                         $modelo = (string) ($eqDisp->modelo ?? '');
                                         $label = $desc . ($modelo !== '' ? (' (' . $modelo . ')') : '');
+                                        $ja = isset($jaVinculados[$eqId]);
                                     ?>
-                                    <option value="<?= $eqId ?>" <?= isset($jaVinculados[$eqId]) ? 'disabled' : '' ?>>
-                                        <?= htmlspecialchars($label) ?><?= isset($jaVinculados[$eqId]) ? ' [ja vinculado]' : '' ?>
-                                    </option>
+                                    <label class="pmoc-equip-item <?= $ja ? 'is-linked' : '' ?>">
+                                        <input type="checkbox" name="equipamentos_adicionais[]" value="<?= $eqId ?>" <?= $ja ? 'disabled' : '' ?>>
+                                        <span><?= htmlspecialchars($label) ?><?= $ja ? ' [ja vinculado]' : '' ?></span>
+                                    </label>
                                 <?php endforeach; ?>
-                            </select>
-                            <small class="pmoc-file-count">Use Ctrl/Command para selecionar mais de um equipamento.</small>
-                        </label>
+                            </div>
+                            <small class="pmoc-file-count">Marque os equipamentos adicionais para vincular nesta OS.</small>
+                        </div>
                     </div>
                 <?php endif; ?>
 

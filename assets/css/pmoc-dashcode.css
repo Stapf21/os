@@ -879,6 +879,39 @@
   resize: vertical;
 }
 
+.pmoc-checklist .pmoc-checklist-equip-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+.pmoc-checklist .pmoc-equip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  border: 1px solid var(--pmoc-border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.pmoc-checklist .pmoc-equip-item input {
+  margin-top: 2px;
+}
+
+.pmoc-checklist .pmoc-equip-item span {
+  color: var(--pmoc-text);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.pmoc-checklist .pmoc-equip-item.is-linked {
+  opacity: .65;
+  cursor: not-allowed;
+  background: var(--pmoc-bg);
+}
+
 @media (max-width: 1080px) {
   .pmoc-checklist .pmoc-checklist-top-grid {
     grid-template-columns: repeat(2, minmax(170px, 1fr));
@@ -888,7 +921,8 @@
 @media (max-width: 680px) {
   .pmoc-checklist .pmoc-checklist-chip-row,
   .pmoc-checklist .pmoc-checklist-top-grid,
-  .pmoc-checklist .pmoc-checklist-grid {
+  .pmoc-checklist .pmoc-checklist-grid,
+  .pmoc-checklist .pmoc-checklist-equip-list {
     grid-template-columns: 1fr;
   }
 }
@@ -929,6 +963,50 @@
   }
 
   .pmoc-dash .pmoc-unit-actions .btn {
+    margin-bottom: 4px;
+  }
+}
+.pmoc-history .pmoc-history-chip-row {
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+}
+
+.pmoc-history .pmoc-history-kpi-grid {
+  grid-template-columns: repeat(3, minmax(140px, 1fr));
+}
+
+.pmoc-history .pmoc-history-obs {
+  min-width: 260px;
+  max-width: 520px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.pmoc-history .pmoc-history-actions {
+  white-space: nowrap;
+}
+
+.pmoc-history .pmoc-history-actions .btn {
+  margin-right: 4px;
+}
+
+@media (max-width: 860px) {
+  .pmoc-history .pmoc-history-chip-row,
+  .pmoc-history .pmoc-history-kpi-grid {
+    grid-template-columns: repeat(2, minmax(130px, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .pmoc-history .pmoc-history-chip-row,
+  .pmoc-history .pmoc-history-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pmoc-history .pmoc-history-actions {
+    white-space: normal;
+  }
+
+  .pmoc-history .pmoc-history-actions .btn {
     margin-bottom: 4px;
   }
 }

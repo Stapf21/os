@@ -625,11 +625,31 @@ class Pmoc extends MY_Controller
 
     public function excluir_os_pmoc($id)
     {
+        $redirectAlvo = trim((string) $this->input->get('redirect'));
         if ($this->OsPmoc_model->delete($id)) {
             $this->session->set_flashdata('success', 'OS PMOC excluida com sucesso!');
         } else {
             $this->session->set_flashdata('error', 'Erro ao excluir OS PMOC.');
         }
+
+        if ($redirectAlvo !== '') {
+            $redirectAlvo = urldecode($redirectAlvo);
+            if (mb_strpos($redirectAlvo, 'http://') !== 0 && mb_strpos($redirectAlvo, 'https://') !== 0) {
+                redirect(ltrim($redirectAlvo, '/'));
+                return;
+            }
+            if (mb_strpos($redirectAlvo, base_url()) === 0) {
+                redirect($redirectAlvo);
+                return;
+            }
+        }
+
+        $referer = (string) $this->input->server('HTTP_REFERER');
+        if ($referer !== '' && mb_strpos($referer, base_url()) === 0) {
+            redirect($referer);
+            return;
+        }
+
         redirect('pmoc');
     }
 

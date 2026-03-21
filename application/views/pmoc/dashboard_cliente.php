@@ -225,7 +225,12 @@ if (!empty($unidades) && (int) $unidadeId > 0) {
                                     <?php if (!$item->os_pmoc_id): ?>
                                         <a href="<?= base_url('pmoc/nova_os_pmoc/' . (int) $plano->id_pmoc . '?data_prevista=' . htmlspecialchars((string) $item->data_prevista) . '&unidade_id=' . (int) $unidadeId) ?>" class="btn btn-small">Criar OS nesta data</a>
                                     <?php else: ?>
-                                        <span class="pmoc-empty">-</span>
+                                        <?php
+                                            $redirectCronograma = 'pmoc/plano/' . (int) $plano->id_pmoc . '?tab=cronograma&unidade_id=' . (int) $unidadeId;
+                                        ?>
+                                        <a href="<?= base_url('pmoc/os_pmoc/' . (int) $item->os_pmoc_id) ?>" class="btn btn-small btn-primary">Visualizar</a>
+                                        <a href="<?= base_url('pmoc/editar_os_pmoc/' . (int) $item->os_pmoc_id) ?>" class="btn btn-small">Editar</a>
+                                        <a href="<?= base_url('pmoc/excluir_os_pmoc/' . (int) $item->os_pmoc_id . '?redirect=' . rawurlencode($redirectCronograma)) ?>" class="btn btn-small btn-danger" onclick="return confirm('Tem certeza que deseja excluir esta visita/OS PMOC?');">Excluir</a>
                                     <?php endif; ?>
                                 </td>
                             </tr>

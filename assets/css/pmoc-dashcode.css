@@ -1010,3 +1010,336 @@
     margin-bottom: 4px;
   }
 }
+
+/* Client PMOC v2 - dashboard quality overrides */
+.pmoc-cl {
+  --cl-bg: #f4f7fc;
+  --cl-card: #ffffff;
+  --cl-border: #d7e1ef;
+  --cl-text: #0f172a;
+  --cl-muted: #64748b;
+  --cl-primary-1: #1d4ed8;
+  --cl-primary-2: #2563eb;
+  --cl-soft: #eff6ff;
+  --cl-radius: 14px;
+  --cl-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  --cl-shadow-soft: 0 4px 12px rgba(15, 23, 42, 0.06);
+
+  color: var(--cl-text);
+  font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+}
+
+.pmoc-cl .pmoc-cl-hero {
+  background: linear-gradient(145deg, #f8fbff, #eef4ff);
+  border: 1px solid #cfe0fb;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: var(--cl-shadow-soft);
+}
+
+.pmoc-cl .pmoc-cl-hero-main h3 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.pmoc-cl .pmoc-cl-hero-main p {
+  margin: 8px 0 0;
+  color: var(--cl-muted);
+  font-size: 1rem;
+}
+
+.pmoc-cl .pmoc-cl-contract-grid {
+  margin-top: 16px;
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.pmoc-cl .pmoc-cl-chip {
+  background: var(--cl-card);
+  border: 1px solid var(--cl-border);
+  border-radius: 12px;
+  padding: 12px 13px;
+  color: var(--cl-muted);
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+}
+
+.pmoc-cl .pmoc-cl-chip b {
+  margin-top: 4px;
+  color: var(--cl-text);
+  font-size: 1.05rem;
+}
+
+.pmoc-cl .pmoc-cl-nav {
+  position: sticky;
+  top: 82px;
+  z-index: 5;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 14px 0;
+  padding: 10px;
+  border: 1px solid var(--cl-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+}
+
+.pmoc-cl .pmoc-nav-btn {
+  border: 1px solid var(--cl-border);
+  border-radius: 999px;
+  background: #fff;
+  color: #1e293b;
+  font-weight: 700;
+  font-size: 0.83rem;
+  padding: 8px 14px;
+  transition: all .2s ease;
+}
+
+.pmoc-cl .pmoc-nav-btn:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.pmoc-cl .pmoc-nav-btn.active {
+  background: linear-gradient(135deg, var(--cl-primary-1), var(--cl-primary-2));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.32);
+}
+
+.pmoc-cl .pmoc-cl-kpi {
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.pmoc-cl .pmoc-cl-kpi > div {
+  border: 1px solid var(--cl-border);
+  border-radius: 12px;
+  background: #fff;
+  padding: 14px;
+  box-shadow: var(--cl-shadow-soft);
+}
+
+.pmoc-cl .pmoc-cl-kpi > div > div:first-child {
+  color: var(--cl-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.pmoc-cl .pmoc-cl-kpi .n {
+  margin-top: 6px;
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 700;
+  color: #0b295f;
+}
+
+.pmoc-cl .pmoc-section {
+  display: none;
+}
+
+.pmoc-cl .pmoc-section.is-active {
+  display: block;
+}
+
+.pmoc-cl .pmoc-cl-box {
+  border: 1px solid var(--cl-border);
+  border-radius: var(--cl-radius);
+  background: var(--cl-card);
+  box-shadow: var(--cl-shadow);
+  margin-bottom: 16px;
+}
+
+.pmoc-cl .pmoc-cl-box h4 {
+  margin: 0;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--cl-border);
+  font-size: 1.45rem;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.pmoc-cl .pmoc-cl-box .body {
+  padding: 16px 18px 18px;
+}
+
+.pmoc-cl .pmoc-form-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr 2fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.pmoc-cl .pmoc-form input,
+.pmoc-cl .pmoc-form select,
+.pmoc-cl .pmoc-search input {
+  width: 100%;
+  height: 42px;
+  border: 1px solid var(--cl-border);
+  border-radius: 10px;
+  padding: 0 12px;
+  color: #0f172a;
+  background: #fff;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.pmoc-cl .pmoc-form input:focus,
+.pmoc-cl .pmoc-form select:focus,
+.pmoc-cl .pmoc-search input:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.13);
+  outline: none;
+}
+
+.pmoc-cl .pmoc-form .btn,
+.pmoc-cl .pmoc-search .btn {
+  min-height: 42px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.pmoc-cl .pmoc-reparo-resumo {
+  margin-bottom: 12px;
+}
+
+.pmoc-cl .pmoc-cl-tag {
+  border-radius: 999px;
+  border: 1px solid var(--cl-border);
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.pmoc-cl .pmoc-status-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.pmoc-cl .pmoc-status-pill {
+  border-radius: 999px;
+  border: 1px solid var(--cl-border);
+  background: #fff;
+  color: #334155;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 6px 10px;
+}
+
+.pmoc-cl .pmoc-status-pill.active {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-color: #93c5fd;
+}
+
+.pmoc-cl .pmoc-table-wrap {
+  border: 1px solid var(--cl-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.pmoc-cl .table {
+  margin: 0;
+}
+
+.pmoc-cl .table thead th {
+  background: #f8fbff;
+  color: #5b6f89;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  border-bottom: 1px solid var(--cl-border);
+}
+
+.pmoc-cl .table tbody td {
+  vertical-align: middle;
+  color: #1e293b;
+}
+
+.pmoc-cl .table tbody tr:hover {
+  background: #f0f7ff;
+}
+
+.pmoc-cl .pmoc-money-grid {
+  margin-top: 6px;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.pmoc-cl .pmoc-money-card {
+  border: 1px solid var(--cl-border);
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px;
+  box-shadow: var(--cl-shadow-soft);
+}
+
+.pmoc-cl .pmoc-money-card .label {
+  margin: 0;
+  color: var(--cl-muted);
+  font-size: 0.8rem;
+}
+
+.pmoc-cl .pmoc-money-card .value {
+  margin: 4px 0 0;
+  color: #0f172a;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.pmoc-cl hr {
+  border-top: 1px solid var(--cl-border);
+  margin: 16px 0;
+}
+
+.pmoc-cl h5 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .pmoc-cl .pmoc-cl-contract-grid,
+  .pmoc-cl .pmoc-cl-kpi,
+  .pmoc-cl .pmoc-money-grid {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+
+  .pmoc-cl .pmoc-form-grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+
+  .pmoc-cl .pmoc-form-grid .btn {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .pmoc-cl .pmoc-cl-hero {
+    padding: 14px;
+  }
+
+  .pmoc-cl .pmoc-cl-hero-main h3 {
+    font-size: 1.5rem;
+  }
+
+  .pmoc-cl .pmoc-cl-contract-grid,
+  .pmoc-cl .pmoc-cl-kpi,
+  .pmoc-cl .pmoc-money-grid,
+  .pmoc-cl .pmoc-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pmoc-cl .pmoc-cl-nav {
+    top: 70px;
+  }
+
+  .pmoc-cl .pmoc-nav-btn {
+    width: 100%;
+    text-align: left;
+  }
+}

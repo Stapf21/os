@@ -149,6 +149,7 @@ class Pmoc_model extends CI_Model
         $inicio = ! empty($plano->data_inicio_contrato) ? $plano->data_inicio_contrato : date('Y-m-d');
         $intervalo = $this->frequenciasMeses[$plano->frequencia_manutencao ?? 'mensal'] ?? 1;
         $mapaOs = [];
+        $datasExcluidas = $this->getDatasCronogramaExcluidas((int) $plano->id_pmoc, $unidadeId);
 
         if ($this->db->table_exists('os_pmoc')) {
             $this->db->where('plano_id', $plano->id_pmoc);
@@ -165,6 +166,9 @@ class Pmoc_model extends CI_Model
         $dataAtual = date('Y-m-d');
         for ($i = 0; $i < $meses; $i++) {
             $prevista = date('Y-m-d', strtotime($inicio . ' +' . ($intervalo * $i) . ' month'));
+            if (isset($datasExcluidas[$prevista])) {
+                continue;
+            }
             $status = 'pendente';
             $osId = null;
             $dataExecucao = null;
@@ -187,6 +191,75 @@ class Pmoc_model extends CI_Model
         }
 
         return $cronograma;
+    }
+
+    public function excluirDataCronograma($planoId, $dataPrevista, $unidadeId = null)
+    {
+        if (! $this->db->table_exists('pmoc_cronograma_excecoes')) {
+            return false;
+        }
+
+        $planoId = (int) $planoId;
+        $unidadeId = (int) $unidadeId;
+        $unidadeId = $unidadeId > 0 ? $unidadeId : null;
+        $dataPrevista = trim((string) $dataPrevista);
+
+        if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataPrevista)) {
+            return false;
+        }
+
+        $this->db->where('plano_id', $planoId);
+        $this->db->where('data_prevista', $dataPrevista);
+        $this->db->where('tipo', 'excluir');
+        if ($unidadeId === null) {
+            $this->db->where('cliente_unidade_id IS NULL', null, false);
+        } else {
+            $this->db->where('cliente_unidade_id', $unidadeId);
+        }
+        $exists = (int) $this->db->count_all_results('pmoc_cronograma_excecoes');
+        if ($exists > 0) {
+            return true;
+        }
+
+        return $this->db->insert('pmoc_cronograma_excecoes', [
+            'plano_id' => $planoId,
+            'cliente_unidade_id' => $unidadeId,
+            'data_prevista' => $dataPrevista,
+            'tipo' => 'excluir',
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    private function getDatasCronogramaExcluidas($planoId, $unidadeId = null)
+    {
+        if (! $this->db->table_exists('pmoc_cronograma_excecoes')) {
+            return [];
+        }
+
+        $planoId = (int) $planoId;
+        $unidadeId = (int) $unidadeId;
+        $unidadeId = $unidadeId > 0 ? $unidadeId : null;
+
+        $this->db->select('data_prevista');
+        $this->db->from('pmoc_cronograma_excecoes');
+        $this->db->where('plano_id', $planoId);
+        $this->db->where('tipo', 'excluir');
+        if ($unidadeId === null) {
+            $this->db->where('cliente_unidade_id IS NULL', null, false);
+        } else {
+            $this->db->where('cliente_unidade_id', $unidadeId);
+        }
+
+        $rows = $this->db->get()->result();
+        $map = [];
+        foreach ($rows as $row) {
+            $key = (string) ($row->data_prevista ?? '');
+            if ($key !== '') {
+                $map[$key] = true;
+            }
+        }
+
+        return $map;
     }
 
     public function getRelatoriosByPlano($planoId, $unidadeId = null)

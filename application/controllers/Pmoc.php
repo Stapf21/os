@@ -209,6 +209,37 @@ class Pmoc extends MY_Controller
         redirect('pmoc/plano/' . $plano_id);
     }
 
+    public function excluir_data_cronograma($plano_id)
+    {
+        if (mb_strtolower((string) $this->input->method()) !== 'post') {
+            redirect('pmoc/plano/' . (int) $plano_id . '?tab=cronograma');
+            return;
+        }
+
+        $plano = $this->pmoc_model->getById((int) $plano_id);
+        if (! $plano) {
+            show_404();
+        }
+
+        $dataPrevista = trim((string) $this->input->post('data_prevista'));
+        $unidadeId = (int) $this->input->post('cliente_unidade_id');
+        $unidadeId = $unidadeId > 0 ? $unidadeId : null;
+
+        if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataPrevista)) {
+            $this->session->set_flashdata('error', 'Data prevista invalida para exclusao.');
+            redirect('pmoc/plano/' . (int) $plano->id_pmoc . '?tab=cronograma&unidade_id=' . (int) $unidadeId);
+            return;
+        }
+
+        if ($this->pmoc_model->excluirDataCronograma((int) $plano->id_pmoc, $dataPrevista, $unidadeId)) {
+            $this->session->set_flashdata('success', 'Data do cronograma excluida com sucesso.');
+        } else {
+            $this->session->set_flashdata('error', 'Nao foi possivel excluir a data do cronograma.');
+        }
+
+        redirect('pmoc/plano/' . (int) $plano->id_pmoc . '?tab=cronograma&unidade_id=' . (int) $unidadeId);
+    }
+
     public function nova_os_pmoc($plano_id)
     {
         $plano = $this->pmoc_model->getById((int) $plano_id);

@@ -224,6 +224,12 @@ if (!empty($unidades) && (int) $unidadeId > 0) {
                                 <td>
                                     <?php if (!$item->os_pmoc_id): ?>
                                         <a href="<?= base_url('pmoc/nova_os_pmoc/' . (int) $plano->id_pmoc . '?data_prevista=' . htmlspecialchars((string) $item->data_prevista) . '&unidade_id=' . (int) $unidadeId) ?>" class="btn btn-small">Criar OS nesta data</a>
+                                        <form action="<?= base_url('pmoc/excluir_data_cronograma/' . (int) $plano->id_pmoc) ?>" method="post" style="display:inline-block;margin-left:6px;">
+                                            <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
+                                            <input type="hidden" name="data_prevista" value="<?= htmlspecialchars((string) $item->data_prevista) ?>">
+                                            <input type="hidden" name="cliente_unidade_id" value="<?= (int) $unidadeId ?>">
+                                            <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Deseja excluir esta data prevista do cronograma?');">Excluir data</button>
+                                        </form>
                                     <?php else: ?>
                                         <?php
                                             $redirectCronograma = 'pmoc/plano/' . (int) $plano->id_pmoc . '?tab=cronograma&unidade_id=' . (int) $unidadeId;

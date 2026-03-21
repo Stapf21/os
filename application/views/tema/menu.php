@@ -1,4 +1,4 @@
-<!--sidebar-menu-->
+﻿<!--sidebar-menu-->
 <nav id="sidebar">
     <div id="newlog">
         <div class="icon2">
@@ -34,7 +34,7 @@
                 }; ?>">
                     <a class="tip-bottom" title="" href="<?= base_url() ?>"><i class='bx bx-home-alt iconX'></i>
                         <span class="title nav-title">Home</span>
-                        <span class="title-tooltip">InÃ­cio</span>
+                        <span class="title-tooltip">Início</span>
                     </a>
                 </li>
 
@@ -65,8 +65,8 @@
                         echo 'active';
                     }; ?>">
                         <a class="tip-bottom" title="" href="<?= site_url('servicos') ?>"><i class='bx bx-wrench iconX'></i>
-                            <span class="title">ServiÃ§os</span>
-                            <span class="title-tooltip">ServiÃ§os</span>
+                            <span class="title">Serviços</span>
+                            <span class="title-tooltip">Serviços</span>
                         </a>
                     </li>
                 <?php } ?>
@@ -87,8 +87,8 @@
                         echo 'active';
                     }; ?>">
                         <a class="tip-bottom" title="" href="<?= site_url('orcamentos') ?>"><i class='bx bx-file iconX'></i>
-                            <span class="title">Orcamentos</span>
-                            <span class="title-tooltip">Orcamentos</span>
+                            <span class="title">Orçamentos</span>
+                            <span class="title-tooltip">Orçamentos</span>
                         </a>
                     </li>
                 <?php } ?>
@@ -98,7 +98,7 @@
                         echo 'active';
                     }; ?>">
                         <a class="tip-bottom" title="" href="<?= site_url('os') ?>"><i class='bx bx-file iconX'></i>
-                            <span class="title">Ordens de ServiÃ§o</span>
+                            <span class="title">Ordens de Serviço</span>
                             <span class="title-tooltip">Ordens</span>
                         </a>
                     </li>
@@ -142,8 +142,8 @@
                         echo 'active';
                     }; ?>">
                         <a class="tip-bottom" title="" href="<?= site_url('financeiro/lancamentos') ?>"><i class="bx bx-bar-chart-alt-2 iconX"></i>
-                            <span class="title">LanÃ§amentos</span>
-                            <span class="title-tooltip">LanÃ§amentos</span>
+                            <span class="title">Lançamentos</span>
+                            <span class="title-tooltip">Lançamentos</span>
                         </a>
                     </li>
                     <li class="<?php if (isset($menuPnl)) {
@@ -161,8 +161,8 @@
                         echo 'active';
                     }; ?>">
                         <a class="tip-bottom" title="" href="<?= site_url('cobrancas/cobrancas') ?>"><i class='bx bx-dollar-circle iconX'></i>
-                            <span class="title">CobranÃ§as</span>
-                            <span class="title-tooltip">CobranÃ§as</span>
+                            <span class="title">Cobranças</span>
+                            <span class="title-tooltip">Cobranças</span>
                         </a>
                     </li>
                 <?php } ?>

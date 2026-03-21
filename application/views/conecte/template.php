@@ -26,7 +26,7 @@ $clientePmocOnly = (bool) $this->session->userdata('cliente_pmoc_only');
     <script type="text/javascript" src="<?= base_url(); ?>assets/js/csrf.js"></script>
 </head>
 
-<body class="cliente-layout">
+<body class="cliente-layout <?= $clientePmocOnly ? 'cliente-pmoc-only' : '' ?>">
     <div id="header">
         <h1><a href="#"><?= $this->config->item('app_name'); ?></a></h1>
     </div>
@@ -42,7 +42,7 @@ $clientePmocOnly = (bool) $this->session->userdata('cliente_pmoc_only');
                 <span><?= $this->session->userdata('nome') ?></span>
             </div>
 
-            <ul>
+            <ul class="cliente-menu-list">
                 <?php if ($clientePmocOnly): ?>
                     <li class="cliente-menu-item <?= isset($menuPmoc) ? 'active' : '' ?>">
                         <a class="cliente-menu-link" href="<?= site_url('mine/pmoc'); ?>">

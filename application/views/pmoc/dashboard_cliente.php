@@ -190,12 +190,20 @@ if (!empty($unidades) && (int) $unidadeId > 0) {
                 <button type="button" class="pmoc-status-pill" data-status="concluido">Concluido</button>
                 <button type="button" class="pmoc-status-pill" data-status="atrasado">Atrasado</button>
             </div>
+            <form action="<?= base_url('pmoc/excluir_datas_cronograma_lote/' . (int) $plano->id_pmoc) ?>" method="post" class="pmoc-inline-form" style="margin-top:8px;margin-bottom:8px;" id="form-excluir-datas-lote">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
+                <input type="hidden" name="cliente_unidade_id" value="<?= (int) $unidadeId ?>">
+                <button type="submit" class="btn btn-small btn-danger" id="btn-excluir-datas-lote" disabled onclick="return confirm('Deseja excluir todas as datas selecionadas?');">
+                    Excluir datas selecionadas
+                </button>
+                <span class="pmoc-empty" id="lbl-datas-lote" style="margin-left:8px;">0 selecionada(s)</span>
+            </form>
             <div class="pmoc-search">
                 <input type="text" placeholder="Buscar por data, status ou OS..." data-table-search="#tb-cronograma">
             </div>
             <div class="pmoc-table-wrap">
                 <table class="table table-bordered table-striped pmoc-table-hover" id="tb-cronograma">
-                    <thead><tr><th>Data prevista</th><th>Status</th><th>OS</th><th>Data conclusao</th><th>Acao</th></tr></thead>
+                    <thead><tr><th style="width:36px;"><input type="checkbox" id="ck-datas-all"></th><th>Data prevista</th><th>Status</th><th>OS</th><th>Data conclusao</th><th>Acao</th></tr></thead>
                     <tbody>
                         <?php foreach ($cronograma as $item): ?>
                             <?php
@@ -211,6 +219,13 @@ if (!empty($unidades) && (int) $unidadeId > 0) {
                                 }
                             ?>
                             <tr data-status="<?= htmlspecialchars((string) $statusKey) ?>">
+                                <td>
+                                    <?php if (!$item->os_pmoc_id): ?>
+                                        <input type="checkbox" class="ck-data-item" name="datas_previstas[]" value="<?= htmlspecialchars((string) $item->data_prevista) ?>" form="form-excluir-datas-lote">
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
                                 <td><?= date('d/m/Y', strtotime($item->data_prevista)) ?></td>
                                 <td><span class="pmoc-tag <?= $statusClass ?>"><?= $statusLabel ?></span></td>
                                 <td>
@@ -253,6 +268,26 @@ if (!empty($unidades) && (int) $unidadeId > 0) {
                 <h4 class="pmoc-section-title">Equipamentos</h4>
                 <span class="pmoc-tag pmoc-tag-neutral">Total: <?= count($equipamentos ?? []) ?></span>
             </div>
+            <form action="<?= base_url('pmoc/criar_os_pmoc/' . (int) $plano->id_pmoc) ?>" method="post" class="pmoc-inline-form" style="margin-bottom:10px;" id="form-os-equipamentos-lote">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
+                <input type="hidden" name="status" value="agendado">
+                <input type="hidden" name="redirect_plano" value="1">
+                <input type="hidden" name="cliente_unidade_id" value="<?= (int) $unidadeId ?>">
+                <label style="margin:0;">Data da visita</label>
+                <input type="date" name="data_prevista" value="<?= date('Y-m-d') ?>" required>
+                <select name="usuarios_id" style="width:220px;">
+                    <option value="">Tecnico responsavel</option>
+                    <?php foreach (($tecnicos ?? []) as $tec): ?>
+                        <option value="<?= (int) $tec->idUsuarios ?>" <?= ((int) ($plano->tecnico_responsavel ?? 0) === (int) $tec->idUsuarios) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars((string) $tec->nome) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <button class="btn btn-small btn-primary" type="submit" id="btn-os-equip-lote" disabled>
+                    Criar OS com equipamentos selecionados
+                </button>
+                <span class="pmoc-empty" id="lbl-equip-lote">0 selecionado(s)</span>
+            </form>
             <form method="get" class="pmoc-inline-form" style="margin-bottom:10px;">
                 <input type="hidden" name="tipo_periodo" value="<?= htmlspecialchars((string) $tipoPeriodo) ?>">
                 <input type="hidden" name="periodo_referencia" value="<?= htmlspecialchars((string) $periodoReferencia) ?>">
@@ -276,13 +311,14 @@ if (!empty($unidades) && (int) $unidadeId > 0) {
 
             <div class="pmoc-table-wrap">
                 <table class="table table-bordered table-striped pmoc-table-hover" id="tb-equipamentos">
-                    <thead><tr><th>Unidade</th><th>Equipamento</th><th>Tipo</th><th>BTUs</th><th>Local</th><th>Acoes</th></tr></thead>
+                    <thead><tr><th style="width:36px;"><input type="checkbox" id="ck-equip-all"></th><th>Unidade</th><th>Equipamento</th><th>Tipo</th><th>BTUs</th><th>Local</th><th>Acoes</th></tr></thead>
                     <tbody>
                         <?php if (empty($equipamentos)): ?>
-                            <tr><td colspan="6" class="pmoc-empty">Nenhum equipamento cadastrado.</td></tr>
+                            <tr><td colspan="7" class="pmoc-empty">Nenhum equipamento cadastrado.</td></tr>
                         <?php else: ?>
                             <?php foreach ($equipamentos as $eq): ?>
                                 <tr>
+                                    <td><input type="checkbox" class="ck-equip-item" name="equipamento_ids[]" value="<?= (int) $eq->idEquipamentos ?>" form="form-os-equipamentos-lote"></td>
                                     <td><?= htmlspecialchars((string) ($eq->unidade_nome ?: 'Sem unidade')) ?></td>
                                     <td><?= htmlspecialchars((string) ($eq->descricao ?: $eq->equipamento)) ?></td>
                                     <td><?= htmlspecialchars((string) ($eq->tipo_equipamento ?: '-')) ?></td>
@@ -569,6 +605,50 @@ if (!empty($unidades) && (int) $unidadeId > 0) {
             if (cur >= steps) clearInterval(timer);
         }, 20);
     });
+
+    (function setupBatchDates() {
+        var all = document.getElementById('ck-datas-all');
+        var items = Array.prototype.slice.call(document.querySelectorAll('.ck-data-item'));
+        var btn = document.getElementById('btn-excluir-datas-lote');
+        var lbl = document.getElementById('lbl-datas-lote');
+        if (!all || !btn || !lbl || !items.length) return;
+
+        function sync() {
+            var checked = items.filter(function (el) { return el.checked; }).length;
+            btn.disabled = checked === 0;
+            lbl.textContent = checked + ' selecionada(s)';
+            all.checked = checked > 0 && checked === items.length;
+        }
+
+        all.addEventListener('change', function () {
+            items.forEach(function (el) { el.checked = all.checked; });
+            sync();
+        });
+        items.forEach(function (el) { el.addEventListener('change', sync); });
+        sync();
+    })();
+
+    (function setupBatchEquipamentos() {
+        var all = document.getElementById('ck-equip-all');
+        var items = Array.prototype.slice.call(document.querySelectorAll('.ck-equip-item'));
+        var btn = document.getElementById('btn-os-equip-lote');
+        var lbl = document.getElementById('lbl-equip-lote');
+        if (!all || !btn || !lbl || !items.length) return;
+
+        function sync() {
+            var checked = items.filter(function (el) { return el.checked; }).length;
+            btn.disabled = checked === 0;
+            lbl.textContent = checked + ' selecionado(s)';
+            all.checked = checked > 0 && checked === items.length;
+        }
+
+        all.addEventListener('change', function () {
+            items.forEach(function (el) { el.checked = all.checked; });
+            sync();
+        });
+        items.forEach(function (el) { el.addEventListener('change', sync); });
+        sync();
+    })();
 })();
 </script>
 

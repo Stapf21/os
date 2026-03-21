@@ -240,6 +240,39 @@ class Pmoc extends MY_Controller
         redirect('pmoc/plano/' . (int) $plano->id_pmoc . '?tab=cronograma&unidade_id=' . (int) $unidadeId);
     }
 
+    public function excluir_datas_cronograma_lote($plano_id)
+    {
+        if (mb_strtolower((string) $this->input->method()) !== 'post') {
+            redirect('pmoc/plano/' . (int) $plano_id . '?tab=cronograma');
+            return;
+        }
+
+        $plano = $this->pmoc_model->getById((int) $plano_id);
+        if (! $plano) {
+            show_404();
+        }
+
+        $unidadeId = (int) $this->input->post('cliente_unidade_id');
+        $unidadeId = $unidadeId > 0 ? $unidadeId : null;
+        $datas = $this->input->post('datas_previstas');
+        $datas = is_array($datas) ? $datas : [];
+
+        if (empty($datas)) {
+            $this->session->set_flashdata('error', 'Selecione ao menos uma data para excluir.');
+            redirect('pmoc/plano/' . (int) $plano->id_pmoc . '?tab=cronograma&unidade_id=' . (int) $unidadeId);
+            return;
+        }
+
+        $total = (int) $this->pmoc_model->excluirDatasCronogramaLote((int) $plano->id_pmoc, $datas, $unidadeId);
+        if ($total > 0) {
+            $this->session->set_flashdata('success', $total . ' data(s) do cronograma excluida(s) com sucesso.');
+        } else {
+            $this->session->set_flashdata('error', 'Nenhuma data valida foi excluida.');
+        }
+
+        redirect('pmoc/plano/' . (int) $plano->id_pmoc . '?tab=cronograma&unidade_id=' . (int) $unidadeId);
+    }
+
     public function nova_os_pmoc($plano_id)
     {
         $plano = $this->pmoc_model->getById((int) $plano_id);
@@ -468,9 +501,25 @@ class Pmoc extends MY_Controller
             return;
         }
 
+        $equipamentosSelecionados = $this->input->post('equipamento_ids');
+        $equipamentosSelecionados = is_array($equipamentosSelecionados) ? array_map('intval', $equipamentosSelecionados) : [];
+        $equipamentosSelecionados = array_values(array_unique(array_filter($equipamentosSelecionados)));
+
         $equipamentos = $this->equipamentos_model->getByClienteId($plano->clientes_id, $clienteUnidadeId);
-        foreach ($equipamentos as $eq) {
-            $this->OsPmoc_model->vincularEquipamento($id_os_pmoc, $eq->idEquipamentos);
+        if (! empty($equipamentosSelecionados)) {
+            $permitidos = [];
+            foreach ($equipamentos as $eq) {
+                $permitidos[(int) $eq->idEquipamentos] = true;
+            }
+            foreach ($equipamentosSelecionados as $eqId) {
+                if (isset($permitidos[$eqId])) {
+                    $this->OsPmoc_model->vincularEquipamento($id_os_pmoc, $eqId);
+                }
+            }
+        } else {
+            foreach ($equipamentos as $eq) {
+                $this->OsPmoc_model->vincularEquipamento($id_os_pmoc, $eq->idEquipamentos);
+            }
         }
 
         $this->session->set_flashdata('success', 'OS PMOC criada e vinculada aos equipamentos.');

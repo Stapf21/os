@@ -230,6 +230,27 @@ class Pmoc_model extends CI_Model
         ]);
     }
 
+    public function excluirDatasCronogramaLote($planoId, array $datasPrevistas, $unidadeId = null)
+    {
+        if (! $this->db->table_exists('pmoc_cronograma_excecoes')) {
+            return 0;
+        }
+
+        $total = 0;
+        foreach ($datasPrevistas as $dataPrevista) {
+            $dataPrevista = trim((string) $dataPrevista);
+            if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataPrevista)) {
+                continue;
+            }
+
+            if ($this->excluirDataCronograma((int) $planoId, $dataPrevista, $unidadeId)) {
+                $total++;
+            }
+        }
+
+        return $total;
+    }
+
     private function getDatasCronogramaExcluidas($planoId, $unidadeId = null)
     {
         if (! $this->db->table_exists('pmoc_cronograma_excecoes')) {

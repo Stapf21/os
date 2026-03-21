@@ -27,14 +27,16 @@ $clientePmocOnly = (bool) $this->session->userdata('cliente_pmoc_only');
 </head>
 
 <body class="cliente-layout <?= $clientePmocOnly ? 'cliente-pmoc-only' : '' ?>">
-    <div id="header">
-        <h1><a href="#"><?= $this->config->item('app_name'); ?></a></h1>
-    </div>
-
     <div class="cliente-shell">
         <nav id="sidebar" class="cliente-sidebar">
-            <div class="cliente-logo">
-                <img src="<?= base_url() ?>assets/img/logo3.png" alt="<?= $this->config->item('app_name'); ?>">
+            <div class="cliente-sidebar-header">
+                <div class="cliente-logo">
+                    <img src="<?= base_url() ?>assets/img/logo3.png" alt="<?= $this->config->item('app_name'); ?>">
+                </div>
+                <div class="cliente-brand">
+                    <strong><?= $this->config->item('app_name'); ?></strong>
+                    <small>Area do Cliente</small>
+                </div>
             </div>
 
             <div class="cliente-user-chip">
@@ -42,47 +44,48 @@ $clientePmocOnly = (bool) $this->session->userdata('cliente_pmoc_only');
                 <span><?= $this->session->userdata('nome') ?></span>
             </div>
 
+            <div class="cliente-menu-label">Navegacao</div>
             <ul class="cliente-menu-list">
                 <?php if ($clientePmocOnly): ?>
                     <li class="cliente-menu-item <?= isset($menuPmoc) ? 'active' : '' ?>">
-                        <a class="cliente-menu-link" href="<?= site_url('mine/pmoc'); ?>">
+                        <a class="cliente-menu-link" href="<?= site_url('mine/pmoc'); ?>" title="PMOC e Plano">
                             <i class='bx bx-clipboard'></i>
                             <span>PMOC e Plano</span>
                         </a>
                     </li>
                 <?php else: ?>
                     <li class="cliente-menu-item <?= isset($menuPainel) ? 'active' : '' ?>">
-                        <a class="cliente-menu-link" href="<?= site_url('mine/painel'); ?>">
+                        <a class="cliente-menu-link" href="<?= site_url('mine/painel'); ?>" title="Painel">
                             <i class='bx bx-home-alt'></i>
                             <span>Painel</span>
                         </a>
                     </li>
                     <li class="cliente-menu-item <?= isset($menuConta) ? 'active' : '' ?>">
-                        <a class="cliente-menu-link" href="<?= site_url('mine/conta'); ?>">
+                        <a class="cliente-menu-link" href="<?= site_url('mine/conta'); ?>" title="Minha Conta">
                             <i class='bx bx-user-circle'></i>
                             <span>Minha Conta</span>
                         </a>
                     </li>
                     <li class="cliente-menu-item <?= isset($menuOs) ? 'active' : '' ?>">
-                        <a class="cliente-menu-link" href="<?= site_url('mine/os'); ?>">
+                        <a class="cliente-menu-link" href="<?= site_url('mine/os'); ?>" title="Ordens de Servico">
                             <i class='bx bx-spreadsheet'></i>
                             <span>Ordens de Servico</span>
                         </a>
                     </li>
                     <li class="cliente-menu-item <?= isset($menuVendas) ? 'active' : '' ?>">
-                        <a class="cliente-menu-link" href="<?= site_url('mine/compras'); ?>">
+                        <a class="cliente-menu-link" href="<?= site_url('mine/compras'); ?>" title="Compras">
                             <i class='bx bx-cart-alt'></i>
                             <span>Compras</span>
                         </a>
                     </li>
                     <li class="cliente-menu-item <?= isset($menuCobrancas) ? 'active' : '' ?>">
-                        <a class="cliente-menu-link" href="<?= site_url('mine/cobrancas'); ?>">
+                        <a class="cliente-menu-link" href="<?= site_url('mine/cobrancas'); ?>" title="Cobrancas">
                             <i class='bx bx-credit-card-front'></i>
                             <span>Cobrancas</span>
                         </a>
                     </li>
                     <li class="cliente-menu-item <?= isset($menuPmoc) ? 'active' : '' ?>">
-                        <a class="cliente-menu-link" href="<?= site_url('mine/pmoc'); ?>">
+                        <a class="cliente-menu-link" href="<?= site_url('mine/pmoc'); ?>" title="PMOC e Plano">
                             <i class='bx bx-clipboard'></i>
                             <span>PMOC e Plano</span>
                         </a>
@@ -90,13 +93,15 @@ $clientePmocOnly = (bool) $this->session->userdata('cliente_pmoc_only');
                 <?php endif; ?>
             </ul>
 
-            <div class="cliente-menu-logout">
-                <a class="cliente-menu-link" href="<?= site_url('mine/sair'); ?>">
+            <div class="cliente-sidebar-footer">
+                <a class="cliente-menu-link cliente-logout-link" href="<?= site_url('mine/sair'); ?>" title="Sair">
                     <i class='bx bx-log-out-circle'></i>
                     <span>Sair</span>
                 </a>
             </div>
         </nav>
+
+        <div class="cliente-sidebar-overlay" id="cliente-sidebar-overlay"></div>
 
         <div id="content" class="cliente-content">
             <header class="cliente-topbar">
@@ -155,6 +160,7 @@ $clientePmocOnly = (bool) $this->session->userdata('cliente_pmoc_only');
             var $body = $('body');
             var $toggle = $('#cliente-menu-toggle');
             var $icon = $('#cliente-menu-toggle-icon');
+            var $overlay = $('#cliente-sidebar-overlay');
             var mobileBreakpoint = 980;
 
             function isMobile() {
@@ -191,6 +197,11 @@ $clientePmocOnly = (bool) $this->session->userdata('cliente_pmoc_only');
                     localStorage.setItem('clienteSidebarCollapsed', $body.hasClass('sidebar-collapsed') ? '1' : '0');
                 }
 
+                applyIcon();
+            });
+
+            $overlay.on('click', function() {
+                $body.removeClass('sidebar-open');
                 applyIcon();
             });
 

@@ -100,8 +100,8 @@ $clientePmocOnly = (bool) $this->session->userdata('cliente_pmoc_only');
 
         <div id="content" class="cliente-content">
             <header class="cliente-topbar">
-                <button type="button" class="cliente-mobile-toggle" id="cliente-menu-toggle" aria-label="Abrir menu">
-                    <i class='bx bx-menu'></i>
+                <button type="button" class="cliente-sidebar-toggle" id="cliente-menu-toggle" aria-label="Alternar menu lateral">
+                    <i class='bx bx-menu' id="cliente-menu-toggle-icon"></i>
                 </button>
 
                 <div id="breadcrumb">
@@ -152,15 +152,66 @@ $clientePmocOnly = (bool) $this->session->userdata('cliente_pmoc_only');
     <script src="<?= base_url(); ?>assets/js/matrix.js"></script>
     <script>
         $(function() {
-            $('#cliente-menu-toggle').on('click', function() {
-                $('body').toggleClass('sidebar-open');
+            var $body = $('body');
+            var $toggle = $('#cliente-menu-toggle');
+            var $icon = $('#cliente-menu-toggle-icon');
+            var mobileBreakpoint = 980;
+
+            function isMobile() {
+                return $(window).width() <= mobileBreakpoint;
+            }
+
+            function applyIcon() {
+                if (isMobile()) {
+                    $icon.attr('class', $body.hasClass('sidebar-open') ? 'bx bx-x' : 'bx bx-menu');
+                    return;
+                }
+
+                $icon.attr('class', $body.hasClass('sidebar-collapsed') ? 'bx bx-chevrons-right' : 'bx bx-chevrons-left');
+            }
+
+            function loadDesktopPreference() {
+                if (isMobile()) {
+                    $body.removeClass('sidebar-collapsed');
+                    return;
+                }
+
+                if (localStorage.getItem('clienteSidebarCollapsed') === '1') {
+                    $body.addClass('sidebar-collapsed');
+                } else {
+                    $body.removeClass('sidebar-collapsed');
+                }
+            }
+
+            $toggle.on('click', function() {
+                if (isMobile()) {
+                    $body.toggleClass('sidebar-open');
+                } else {
+                    $body.toggleClass('sidebar-collapsed');
+                    localStorage.setItem('clienteSidebarCollapsed', $body.hasClass('sidebar-collapsed') ? '1' : '0');
+                }
+
+                applyIcon();
             });
 
             $('#sidebar a').on('click', function() {
-                if ($(window).width() <= 980) {
-                    $('body').removeClass('sidebar-open');
+                if (isMobile()) {
+                    $body.removeClass('sidebar-open');
+                    applyIcon();
                 }
             });
+
+            $(window).on('resize', function() {
+                if (isMobile()) {
+                    $body.removeClass('sidebar-open');
+                } else {
+                    loadDesktopPreference();
+                }
+                applyIcon();
+            });
+
+            loadDesktopPreference();
+            applyIcon();
         });
     </script>
 </body>

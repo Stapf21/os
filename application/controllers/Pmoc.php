@@ -11,6 +11,7 @@ class Pmoc extends MY_Controller
         $this->load->model('pmoc_model');
         $this->load->model('clientes_model');
         $this->load->model('usuarios_model');
+        $this->load->model('servicos_model');
         $this->load->model('equipamentos_model');
         $this->load->model('ChecklistPmoc_model');
         $this->load->model('OsPmoc_model');
@@ -449,6 +450,25 @@ class Pmoc extends MY_Controller
 
         $this->data['os'] = $os_pmoc;
         $this->data['equipamentos'] = $this->OsPmoc_model->getEquipamentos($os_pmoc_id);
+        $this->data['equipamentosDisponiveis'] = $this->equipamentos_model->getByClienteId((int) $os_pmoc->clientes_id, (int) ($os_pmoc->cliente_unidade_id ?: 0));
+        $this->data['tecnicos'] = $this->db
+            ->select('idUsuarios, nome')
+            ->from('usuarios')
+            ->order_by('nome', 'asc')
+            ->get()
+            ->result();
+        $this->data['servicosPadrao'] = $this->db->table_exists('servicos')
+            ? $this->db->select('idServicos, nome')->from('servicos')->order_by('nome', 'asc')->get()->result()
+            : [];
+        $tecnicoPadrao = '';
+        if (! empty($os_pmoc->usuarios_id)) {
+            $usuarioOs = $this->db->select('nome')->from('usuarios')->where('idUsuarios', (int) $os_pmoc->usuarios_id)->get()->row();
+            if ($usuarioOs && ! empty($usuarioOs->nome)) {
+                $tecnicoPadrao = (string) $usuarioOs->nome;
+            }
+        }
+        $this->data['tecnicoPadrao'] = $tecnicoPadrao;
+        $this->data['tipoServicoPadrao'] = (string) ($os_pmoc->tipo_atendimento ?: '');
         $this->data['checklist'] = $this->ChecklistPmoc_model->getByOs($os_pmoc_id);
         $this->data['view'] = 'pmoc/checklist';
         return $this->layout();
@@ -458,6 +478,16 @@ class Pmoc extends MY_Controller
     {
         $os_pmoc_id = (int) $this->input->post('os_id');
         $equipamento_id = (int) $this->input->post('equipamento_id');
+        $equipamentosAdicionais = $this->input->post('equipamentos_adicionais');
+
+        if (is_array($equipamentosAdicionais)) {
+            foreach ($equipamentosAdicionais as $eqAdicional) {
+                $eqId = (int) $eqAdicional;
+                if ($eqId > 0) {
+                    $this->OsPmoc_model->vincularEquipamento($os_pmoc_id, $eqId);
+                }
+            }
+        }
 
         $campos_com_fotos = ['limpeza_filtros', 'carga_gas', 'condicoes_isolamento', 'estado_serpentina', 'bandeja_condensado', 'fiacao_conexoes', 'dreno', 'painel_eletrico', 'grelhas_difusores', 'ruidos_anormais', 'bomba_drenagem', 'controle_termostato', 'vazamentos_identificados'];
 

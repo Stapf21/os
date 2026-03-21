@@ -27,6 +27,16 @@ class OsPmoc_model extends CI_Model
 
     public function vincularEquipamento($os_pmoc_id, $equipamento_id)
     {
+        if ($this->db->table_exists('equipamentos_os_pmoc')) {
+            $existe = $this->db
+                ->where('os_pmoc_id', (int) $os_pmoc_id)
+                ->where('equipamento_id', (int) $equipamento_id)
+                ->count_all_results('equipamentos_os_pmoc');
+            if ((int) $existe > 0) {
+                return true;
+            }
+        }
+
         $data = [
             'os_pmoc_id' => $os_pmoc_id,
             'equipamento_id' => $equipamento_id

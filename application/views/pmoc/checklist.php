@@ -18,6 +18,11 @@ $statusLabel = $statusMap[$statusAtual][0] ?? ucfirst($statusAtual ?: 'Agendado'
 $statusClass = $statusMap[$statusAtual][1] ?? 'pmoc-tag-neutral';
 
 $equipamentosQtd = is_array($equipamentos) ? count($equipamentos) : 0;
+$equipamentosDisponiveis = is_array($equipamentosDisponiveis ?? null) ? $equipamentosDisponiveis : ($equipamentos ?? []);
+$tecnicos = is_array($tecnicos ?? null) ? $tecnicos : [];
+$servicosPadrao = is_array($servicosPadrao ?? null) ? $servicosPadrao : [];
+$tecnicoPadrao = (string) ($tecnicoPadrao ?? '');
+$tipoServicoPadrao = (string) ($tipoServicoPadrao ?? '');
 
 $itensChecklist = [
     'limpeza_filtros' => ['label' => 'Limpeza de filtros', 'opcoes' => ['Pendente', 'OK', 'Nao Aplicavel']],
@@ -91,14 +96,56 @@ $action = base_url('pmoc/salvarChecklist');
 
                     <label class="pmoc-checklist-field">
                         <span>Tecnico responsavel</span>
-                        <input type="text" name="tecnico_responsavel" placeholder="Nome do tecnico" required>
+                        <input type="text" name="tecnico_responsavel" list="pmoc-tecnicos-list" value="<?= htmlspecialchars($tecnicoPadrao) ?>" placeholder="Nome do tecnico" required>
                     </label>
 
                     <label class="pmoc-checklist-field">
                         <span>Tipo de servico</span>
-                        <input type="text" name="tipo_servico" placeholder="Ex: manutencao preventiva" required>
+                        <input type="text" name="tipo_servico" list="pmoc-servicos-list" value="<?= htmlspecialchars($tipoServicoPadrao) ?>" placeholder="Ex: manutencao preventiva" required>
                     </label>
                 </div>
+                <datalist id="pmoc-servicos-list">
+                    <?php foreach ($servicosPadrao as $srv): ?>
+                        <?php $nomeServico = trim((string) ($srv->nome ?? '')); ?>
+                        <?php if ($nomeServico === '') continue; ?>
+                        <option value="<?= htmlspecialchars($nomeServico) ?>"></option>
+                    <?php endforeach; ?>
+                </datalist>
+                <datalist id="pmoc-tecnicos-list">
+                    <?php foreach ($tecnicos as $tec): ?>
+                        <?php $nomeTec = trim((string) ($tec->nome ?? '')); ?>
+                        <?php if ($nomeTec === '') continue; ?>
+                        <option value="<?= htmlspecialchars($nomeTec) ?>"></option>
+                    <?php endforeach; ?>
+                </datalist>
+
+                <?php if (! empty($equipamentosDisponiveis)): ?>
+                    <div class="pmoc-checklist-notes" style="margin-bottom:12px;">
+                        <label class="pmoc-checklist-field" style="margin:0;">
+                            <span>Adicionar equipamentos na OS (opcional)</span>
+                            <select name="equipamentos_adicionais[]" multiple size="4">
+                                <?php
+                                    $jaVinculados = [];
+                                    foreach (($equipamentos ?? []) as $eqV) {
+                                        $jaVinculados[(int) $eqV->idEquipamentos] = true;
+                                    }
+                                ?>
+                                <?php foreach ($equipamentosDisponiveis as $eqDisp): ?>
+                                    <?php
+                                        $eqId = (int) $eqDisp->idEquipamentos;
+                                        $desc = (string) ($eqDisp->descricao ?? $eqDisp->equipamento ?? 'Equipamento');
+                                        $modelo = (string) ($eqDisp->modelo ?? '');
+                                        $label = $desc . ($modelo !== '' ? (' (' . $modelo . ')') : '');
+                                    ?>
+                                    <option value="<?= $eqId ?>" <?= isset($jaVinculados[$eqId]) ? 'disabled' : '' ?>>
+                                        <?= htmlspecialchars($label) ?><?= isset($jaVinculados[$eqId]) ? ' [ja vinculado]' : '' ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <small class="pmoc-file-count">Use Ctrl/Command para selecionar mais de um equipamento.</small>
+                        </label>
+                    </div>
+                <?php endif; ?>
 
                 <div class="pmoc-checklist-progress">
                     <div class="pmoc-checklist-progress-label">Preenchimento dos itens tecnicos</div>

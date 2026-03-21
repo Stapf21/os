@@ -33,6 +33,22 @@ $statusLabels = [
     'concluido' => 'Concluido',
     'atrasado' => 'Atrasado',
 ];
+
+$paramsBase = [
+    'tipo_periodo' => (string) $tipoPeriodo,
+    'periodo_referencia' => (string) $periodoReferencia,
+    'data_inicio' => (string) $dataInicio,
+    'data_fim' => (string) $dataFim,
+];
+$unidadeSelecionada = null;
+if (!empty($unidades) && (int) $unidadeId > 0) {
+    foreach ($unidades as $uItem) {
+        if ((int) $uItem->idClienteUnidade === (int) $unidadeId) {
+            $unidadeSelecionada = $uItem;
+            break;
+        }
+    }
+}
 ?>
 
 <link rel="stylesheet" href="<?= base_url('assets/css/pmoc-dashcode.css?v=' . @filemtime(FCPATH . 'assets/css/pmoc-dashcode.css')) ?>" />
@@ -67,6 +83,12 @@ $statusLabels = [
                 <div class="pmoc-kpi pmoc-kpi-success"><div class="pmoc-kpi-label">Concluido</div><div class="pmoc-kpi-value"><?= (int) $resumoOs['concluido'] ?></div></div>
                 <div class="pmoc-kpi pmoc-kpi-danger"><div class="pmoc-kpi-label">Atrasado</div><div class="pmoc-kpi-value"><?= (int) $resumoOs['atrasado'] ?></div></div>
             </div>
+            <?php if ($unidadeSelecionada): ?>
+                <div class="pmoc-filter-banner">
+                    Filtro ativo por unidade: <strong><?= htmlspecialchars((string) $unidadeSelecionada->nome) ?></strong>
+                    <a href="<?= base_url('pmoc/plano/' . (int) $plano->id_pmoc . '?' . http_build_query($paramsBase + ['tab' => 'unidades'])) ?>">ver consolidado</a>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -96,14 +118,20 @@ $statusLabels = [
             </form>
             <div class="pmoc-table-wrap">
                 <table class="table table-bordered table-striped pmoc-table-hover">
-                    <thead><tr><th>Nome</th><th>Empresa</th><th>Cidade</th><th>UF</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Nome</th><th>Empresa</th><th>Cidade</th><th>UF</th><th>Status</th><th>Acoes</th></tr></thead>
                     <tbody>
                         <?php if (empty($unidades)): ?>
-                            <tr><td colspan="5" class="pmoc-empty">Nenhuma unidade cadastrada.</td></tr>
+                            <tr><td colspan="6" class="pmoc-empty">Nenhuma unidade cadastrada.</td></tr>
                         <?php else: ?>
                             <?php foreach ($unidades as $u): ?>
+                                <?php
+                                    $baseUnidade = $paramsBase + ['unidade_id' => (int) $u->idClienteUnidade];
+                                    $urlEquipamentos = base_url('pmoc/plano/' . (int) $plano->id_pmoc . '?' . http_build_query($baseUnidade + ['tab' => 'equipamentos']));
+                                    $urlCronograma = base_url('pmoc/plano/' . (int) $plano->id_pmoc . '?' . http_build_query($baseUnidade + ['tab' => 'cronograma']));
+                                    $urlRelatorios = base_url('pmoc/plano/' . (int) $plano->id_pmoc . '?' . http_build_query($baseUnidade + ['tab' => 'relatorios']));
+                                ?>
                                 <tr>
-                                    <td><?= htmlspecialchars((string) $u->nome) ?></td>
+                                    <td><a href="<?= $urlEquipamentos ?>" class="pmoc-link-unit"><?= htmlspecialchars((string) $u->nome) ?></a></td>
                                     <td><?= htmlspecialchars((string) $u->empresa) ?></td>
                                     <td><?= htmlspecialchars((string) $u->cidade) ?></td>
                                     <td><?= htmlspecialchars((string) $u->estado) ?></td>
@@ -113,6 +141,11 @@ $statusLabels = [
                                         <?php else: ?>
                                             <span class="pmoc-tag pmoc-tag-neutral">Inativa</span>
                                         <?php endif; ?>
+                                    </td>
+                                    <td class="pmoc-unit-actions">
+                                        <a class="btn btn-small" href="<?= $urlEquipamentos ?>">Equipamentos</a>
+                                        <a class="btn btn-small" href="<?= $urlCronograma ?>">Cronograma</a>
+                                        <a class="btn btn-small" href="<?= $urlRelatorios ?>">Relatorios</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -439,13 +472,29 @@ $statusLabels = [
         });
     }
 
+    function tabFromUrl() {
+        try {
+            var params = new URLSearchParams(window.location.search || '');
+            return params.get('tab') || '';
+        } catch (e) {
+            return '';
+        }
+    }
+
     document.querySelectorAll('[data-tab-nav] .pmoc-nav-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            abrirAba(btn.getAttribute('data-tab'));
+            var tab = btn.getAttribute('data-tab');
+            abrirAba(tab);
+            if (window.history && window.history.replaceState) {
+                var url = new URL(window.location.href);
+                url.searchParams.set('tab', tab);
+                window.history.replaceState({}, '', url.toString());
+            }
         });
     });
 
-    abrirAba('unidades');
+    var initialTab = tabFromUrl();
+    abrirAba(initialTab || 'unidades');
 
     document.querySelectorAll('[data-table-search]').forEach(function (input) {
         var table = document.querySelector(input.getAttribute('data-table-search'));

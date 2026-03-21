@@ -163,9 +163,9 @@ class Pmoc extends MY_Controller
         $this->data['dataFim'] = $dataFim;
         $this->data['equipamentos'] = $this->pmoc_model->getEquipamentos($plano->clientes_id, $unidadeId ?: null);
         $this->data['unidades'] = $this->pmoc_model->getUnidades($plano->clientes_id);
-        $this->data['cronograma'] = $this->pmoc_model->getCronograma($plano, 12);
-        $this->data['resumoOs'] = $this->pmoc_model->getResumoOsByPlano($plano->id_pmoc);
-        $this->data['relatoriosPmoc'] = $this->pmoc_model->getRelatoriosByPlano($plano->id_pmoc);
+        $this->data['cronograma'] = $this->pmoc_model->getCronograma($plano, 12, $unidadeId ?: null);
+        $this->data['resumoOs'] = $this->pmoc_model->getResumoOsByPlano($plano->id_pmoc, $unidadeId ?: null);
+        $this->data['relatoriosPmoc'] = $this->pmoc_model->getRelatoriosByPlano($plano->id_pmoc, $unidadeId ?: null);
         $this->data['reparos'] = $this->pmoc_model->getReparos($plano->id_pmoc);
         $this->data['pnlResumo'] = $this->pnl_model->getResumoCliente($plano->clientes_id, $dataInicio, $dataFim, $unidadeId ?: null);
         $this->data['resumoUnidadesPnl'] = $this->pnl_model->getResumoPorUnidade($plano->clientes_id, $dataInicio, $dataFim);

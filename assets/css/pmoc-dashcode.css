@@ -892,3 +892,43 @@
     grid-template-columns: 1fr;
   }
 }
+.pmoc-dash .pmoc-filter-banner {
+  margin-top: 10px;
+  border: 1px solid var(--pmoc-border);
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--pmoc-muted);
+}
+
+.pmoc-dash .pmoc-filter-banner strong {
+  color: var(--pmoc-text);
+}
+
+.pmoc-dash .pmoc-filter-banner a {
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.pmoc-dash .pmoc-link-unit {
+  font-weight: 700;
+}
+
+.pmoc-dash .pmoc-unit-actions {
+  white-space: nowrap;
+}
+
+.pmoc-dash .pmoc-unit-actions .btn {
+  margin-right: 4px;
+}
+
+@media (max-width: 920px) {
+  .pmoc-dash .pmoc-unit-actions {
+    white-space: normal;
+  }
+
+  .pmoc-dash .pmoc-unit-actions .btn {
+    margin-bottom: 4px;
+  }
+}

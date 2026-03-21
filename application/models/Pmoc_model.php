@@ -120,15 +120,19 @@ class Pmoc_model extends CI_Model
         return $this->db->get()->result();
     }
 
-    public function getResumoOsByPlano($planoId)
+    public function getResumoOsByPlano($planoId, $unidadeId = null)
     {
         if (! $this->db->table_exists('os_pmoc')) {
             return ['pendente' => 0, 'agendado' => 0, 'em_execucao' => 0, 'concluido' => 0, 'atrasado' => 0];
         }
 
         $result = ['pendente' => 0, 'agendado' => 0, 'em_execucao' => 0, 'concluido' => 0, 'atrasado' => 0];
-
-        $rows = $this->db->select('status, data_prevista')->where('plano_id', $planoId)->get('os_pmoc')->result();
+        $this->db->select('status, data_prevista');
+        $this->db->where('plano_id', $planoId);
+        if ($unidadeId && $this->db->field_exists('cliente_unidade_id', 'os_pmoc')) {
+            $this->db->where('cliente_unidade_id', (int) $unidadeId);
+        }
+        $rows = $this->db->get('os_pmoc')->result();
         foreach ($rows as $row) {
             $status = $this->normalizarStatus($row->status, $row->data_prevista);
             if (isset($result[$status])) {
@@ -139,7 +143,7 @@ class Pmoc_model extends CI_Model
         return $result;
     }
 
-    public function getCronograma($plano, $meses = 12)
+    public function getCronograma($plano, $meses = 12, $unidadeId = null)
     {
         $cronograma = [];
         $inicio = ! empty($plano->data_inicio_contrato) ? $plano->data_inicio_contrato : date('Y-m-d');
@@ -147,7 +151,11 @@ class Pmoc_model extends CI_Model
         $mapaOs = [];
 
         if ($this->db->table_exists('os_pmoc')) {
-            $os = $this->db->where('plano_id', $plano->id_pmoc)->order_by('data_prevista', 'asc')->get('os_pmoc')->result();
+            $this->db->where('plano_id', $plano->id_pmoc);
+            if ($unidadeId && $this->db->field_exists('cliente_unidade_id', 'os_pmoc')) {
+                $this->db->where('cliente_unidade_id', (int) $unidadeId);
+            }
+            $os = $this->db->order_by('data_prevista', 'asc')->get('os_pmoc')->result();
             foreach ($os as $item) {
                 $chave = $item->data_prevista ?: date('Y-m-d', strtotime($item->dataInicial ?: 'now'));
                 $mapaOs[$chave][] = $item;
@@ -181,7 +189,7 @@ class Pmoc_model extends CI_Model
         return $cronograma;
     }
 
-    public function getRelatoriosByPlano($planoId)
+    public function getRelatoriosByPlano($planoId, $unidadeId = null)
     {
         if (! $this->db->table_exists('checklist_os_pmoc') || ! $this->db->table_exists('os_pmoc')) {
             return [];
@@ -195,6 +203,9 @@ class Pmoc_model extends CI_Model
             $this->db->join('cliente_unidades', 'cliente_unidades.idClienteUnidade = equipamentos.cliente_unidade_id', 'left');
         }
         $this->db->where('os_pmoc.plano_id', $planoId);
+        if ($unidadeId && $this->db->field_exists('cliente_unidade_id', 'os_pmoc')) {
+            $this->db->where('os_pmoc.cliente_unidade_id', (int) $unidadeId);
+        }
         $this->db->order_by('checklist_os_pmoc.data_verificacao', 'desc');
 
         return $this->db->get()->result();
